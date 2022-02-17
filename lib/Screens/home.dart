@@ -27,7 +27,6 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               calorieSummary(mealData),
-              //SizedBox(height: 20),
               Expanded(child:ListView(
                 shrinkWrap: true,
                 children: mealSummaries
@@ -83,10 +82,6 @@ class _HomePageState extends State<HomePage> {
       child: SizedBox.expand(
         child: Card (
           color: Color(0xFFEEEEEE),
-          shape: RoundedRectangleBorder(
-           // side: BorderSide(color: tfStyle.trifitColor[900]!, width: 2),
-            borderRadius: BorderRadius.circular(5)
-          ),
           child: Padding(padding: EdgeInsets.all(5),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,7 +138,7 @@ class _HomePageState extends State<HomePage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Text(meal["type"] as String, style: tfStyle.homeCardTitleTextStyle),
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
                   Column(children: items)
                 ],
               
