@@ -71,26 +71,26 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         type: BottomNavigationBarType.fixed,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined, size: 32),
+            activeIcon: Icon(Icons.home, size: 32),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.stacked_line_chart),
+            icon: Icon(Icons.stacked_line_chart, size: 32),
             label: 'Metrics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.at),
+            icon: Icon(CupertinoIcons.at, size: 32),
             label: 'Feed',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.star_border_outlined),
-            activeIcon: Icon(Icons.star),
+            icon: Icon(Icons.star_border_outlined, size: 32),
+            activeIcon: Icon(Icons.star, size: 32),
             label: 'Challenges',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline, size: 32),
+            activeIcon: Icon(Icons.person, size: 32),
             label: 'Profile',
           ),
         ],
