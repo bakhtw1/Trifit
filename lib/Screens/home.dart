@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              calorieSummary(),
+              calorieSummary(mealData),
               //SizedBox(height: 20),
               Expanded(child:ListView(
                 shrinkWrap: true,
@@ -57,14 +57,25 @@ class _HomePageState extends State<HomePage> {
     print("Add food item");
   }
 
-  Widget calorieSummary() {
+  int calculateCaloriesFromFood() {
+    int cals = 0;
+    List meals = SampleData.sampleHomeData[0]["MealEntriesData"];
+    for (var meal in meals) {
+      for (var item in meal["items"]) {
+        cals += item["calories"] as int;
+      }
+    }
+    return cals;
+  }
+
+  Widget calorieSummary(List meals) {
     List sampleHomeData = SampleData.sampleHomeData;
     /*
     Eventually these will all be computed properties or fetched, but for now it'll be dummy data
     */
-    String calsFromFood = sampleHomeData[0]["SummaryCardData"]["CaloriesFromFood"].toString();
-    String calsFromExercise = sampleHomeData[0]["SummaryCardData"]["CaloriesFromExercise"].toString();
-    String netCals = (sampleHomeData[0]["SummaryCardData"]["CaloriesFromFood"] - sampleHomeData[0]["SummaryCardData"]["CaloriesFromExercise"]).toString();
+    int calsFromFood = calculateCaloriesFromFood();
+    int calsFromExercise = sampleHomeData[0]["SummaryCardData"]["CaloriesFromExercise"];
+    String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(
       height: 140,
@@ -86,8 +97,8 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(children: [Text(calsFromFood, style: tfStyle.homeCardTitleTextStyle), Text("Food")]),
-                      Column(children: [Text(calsFromExercise, style: tfStyle.homeCardTitleTextStyle), Text("Exercise")]),
+                      Column(children: [Text(calsFromFood.toString(), style: tfStyle.homeCardTitleTextStyle), Text("Food")]),
+                      Column(children: [Text(calsFromExercise.toString(), style: tfStyle.homeCardTitleTextStyle), Text("Exercise")]),
                       Column(children: [Text(netCals, style: tfStyle.homeCardTitleTextStyle) ,Text("Net")]),
                     ],
                   )
@@ -131,7 +142,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(meal["type"] as String, style: TextStyle(fontSize: 26)),
+                  Text(meal["type"] as String, style: tfStyle.homeCardTitleTextStyle),
                   SizedBox(height: 20),
                   Column(children: items)
                 ],

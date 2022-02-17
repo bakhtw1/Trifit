@@ -1,7 +1,6 @@
 List sampleHomeData = [
   {
     "SummaryCardData": {
-      "CaloriesFromFood": 1450,
       "CaloriesFromExercise": 250,
     },
     "MealEntriesData": [
@@ -9,14 +8,6 @@ List sampleHomeData = [
         "type": "Breakfast",
         "items": [
           {
-            "name": "Banana",
-            "calories": 105,
-          },
-          {
-            "name": "Yogurt",
-            "calories": 118
-          },
-                    {
             "name": "Banana",
             "calories": 105,
           },
