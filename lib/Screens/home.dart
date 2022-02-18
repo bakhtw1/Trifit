@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import '../assets/Styles.dart' as tfStyle;
 import '../assets/SampleData.dart' as SampleData;
+import '../components/dropdown.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -39,7 +40,9 @@ class _HomePageState extends State<HomePage> {
             right: 10,
             child: FloatingActionButton(
               backgroundColor: tfStyle.trifitColor[700],
-              onPressed: showAddFoodItemModal,
+              onPressed: () {
+                showMealEntryDialog();
+              },
               tooltip: 'Add a new entry',
               child: const Icon(Icons.add),
             ),
@@ -48,12 +51,98 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /*
-    This will bring up the screen for adding a food item entry to the home page
-    For now, it will do nothing but print to console
-  */
-  void showAddFoodItemModal() {
-    print("Add food item");
+  void showMealEntryDialog() {
+    String mealType = "One";
+    String dropdownValue = "";
+    List<TextEditingController> itemControllers = [TextEditingController()];
+    List<TextEditingController> calorieControllers = [TextEditingController()];
+
+    List<Widget> itemRows = [
+              Row(
+                children: [ 
+                  Expanded(child: TextFormField(
+                    controller: itemControllers[0],
+                    decoration: InputDecoration(hintText: "Item"),
+                  )),
+                  SizedBox(width: 20),
+                     Expanded(child: TextFormField(
+                    controller: calorieControllers[0],
+                    decoration: InputDecoration(hintText: "Calories"),
+                  )),
+                ],
+              ),
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: Text('Enter a meal'),
+          insetPadding: EdgeInsets.zero,
+          content: Container(
+              width: MediaQuery.of(context).size.width*0.8,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft, 
+                      child: DropdownMenu(onValueSelected: (String value) { dropdownValue = value; })
+                    ),
+                    ...itemRows,
+                  ],
+                )
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  var newItemController = TextEditingController();
+                  var newCalorieController = TextEditingController();
+                  itemControllers.insert(0, newItemController);
+                  calorieControllers.insert(0, newCalorieController);
+                  itemRows.insert(0,Row(
+                    children: [ 
+                      Expanded(child: TextFormField(
+                        controller: itemControllers[0],
+                        decoration: InputDecoration(hintText: "Item"),
+                      )),
+                      SizedBox(width: 20),
+                        Expanded(child: TextFormField(
+                        controller: calorieControllers[0],
+                        decoration: InputDecoration(hintText: "Calories"),
+                      )),
+                    ],
+                  ));
+                });
+              },
+              child: Text('Add row'),
+            ),
+            TextButton(
+              onPressed: () {
+                print(dropdownValue);
+                for (int i = 0; i < itemControllers.length; i++) {
+                  print(itemControllers[i].text);
+                  print(calorieControllers[i].text);
+                }
+                Navigator.pop(context);
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );});
+      },
+    );
+  }
+
+  Row newItemRow() {
+    return Row();
   }
 
   int calculateCaloriesFromFood() {
