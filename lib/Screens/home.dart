@@ -1,6 +1,9 @@
 import 'dart:collection';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:trifit/models/MealModel.dart';
 import '../assets/Styles.dart' as tfStyle;
 import '../assets/SampleData.dart' as SampleData;
 import '../components/dropdown.dart';
@@ -52,7 +55,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showMealEntryDialog() {
-    String mealType = "One";
     String mealTypeDropdownValue = "";
     int numberOfItems = 1;
 
@@ -103,19 +105,32 @@ class _HomePageState extends State<HomePage> {
                           DropdownMenu(
                             onValueSelected: (String value) { 
                               setState(() {
-                              numberOfItems = int.parse(value);
-                              if (numberOfItems > itemRows.length) {
-                                int numberOfNewRows = numberOfItems - itemRows.length;
-                                for (int i = 0; i < numberOfNewRows; i++) {
-                                  var newItemController = TextEditingController();
-                                  var newCalorieController = TextEditingController();
-                                  itemRows.add(newItemRow(newItemController, newCalorieController));
+                                numberOfItems = int.parse(value);
+                                // Add rows to the end of the list if the new number is greater than the previous number
+                                if (numberOfItems > itemRows.length) {
+                                  int numberOfNewRows = numberOfItems - itemRows.length;
+                                  for (int i = 0; i < numberOfNewRows; i++) {
+                                    var newItemController = TextEditingController();
+                                    var newCalorieController = TextEditingController();
+                                    itemControllers.add(newItemController);
+                                    calorieControllers.add(newCalorieController);
+                                    itemRows.add(newItemRow(newItemController, newCalorieController));
+                                  }
+                                } 
+                                // Remove rows from the end of the list if the new number is less than the current number of items
+                                else if (numberOfItems < itemRows.length) {
+                                  int numberOfItemsToRemove = itemRows.length - numberOfItems;
+                                  for (int i = 0; i < numberOfItemsToRemove; i++) {
+                                    itemRows.removeLast();
+                                    itemControllers.removeLast();
+                                    calorieControllers.removeLast();
+                                  }
                                 }
-                              }
                               });
                             },
                             dropdownOptions: ["1", "2", "3", "4"],
                             placeholderText: " ",
+                            // This sets 1 to be the default selected item
                             isDefaultValueFirstItem: numberOfItems == 1,
                           ),
                           SizedBox(width: 10),
@@ -135,12 +150,7 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () {
-                print(mealTypeDropdownValue);
-                print(numberOfItems);
-                for (int i = 0; i < itemControllers.length; i++) {
-                  print(itemControllers[i].text);
-                  print(calorieControllers[i].text);
-                }
+                makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
                 Navigator.pop(context);
               },
               child: Text('Add'),
@@ -151,20 +161,32 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  MealModel makeMealModel(String mealType, List<TextEditingController> itemControllers, List<TextEditingController> calorieControllers) {
+    List<Item> items = [];
+    for (int i = 0; i < itemControllers.length; i++) {
+      items.add(Item(itemControllers[i].text, int.parse(calorieControllers[i].text)));
+    }
+    return MealModel(items, mealType);
+  }
+
   Row newItemRow(TextEditingController itemController, TextEditingController calorieController) {
     return Row(
       children: [ 
         Expanded(
           flex: 2,
           child: TextFormField(
-          controller: itemController,
-          decoration: InputDecoration(hintText: "Item"),
-        )),
+            controller: itemController,
+            decoration: InputDecoration(hintText: "Item"),
+          )
+        ),
         SizedBox(width: 20),
-          Expanded(child: TextFormField(
-          controller: calorieController,
-          decoration: InputDecoration(hintText: "Calories"),
-        )),
+          Expanded(
+            child: TextFormField(
+              keyboardType: TextInputType.number,
+              controller: calorieController,
+              decoration: InputDecoration(hintText: "Calories"),
+            )
+        ),
       ],
     );
   }
