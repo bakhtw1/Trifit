@@ -1,11 +1,11 @@
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:trifit/models/MealModel.dart';
 import '../assets/Styles.dart' as tfStyle;
-import '../assets/SampleData.dart' as SampleData;
 import '../components/dropdown.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,24 +16,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List mealData = SampleData.sampleHomeData[0]["MealEntriesData"];
+
+  List mealData =  [];
   List<Widget> mealSummaries = [];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+      await loadJson();
+      print("Loaded data");
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     for (var meal in mealData) {
       mealSummaries.add(mealSummary(meal));
     }
     // This is so that there's white space at the bottom of the list so the last items are easily viewable. 140 is the default height of a card
-    mealSummaries.add(SizedBox(height: 140));
-    return  Stack(
+    if (mealData.isNotEmpty) { mealSummaries.insert(mealSummaries.length, SizedBox(height: 140)); }
+    return Stack(
         children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              calorieSummary(mealData),
+              mealData.isEmpty? calorieSummaryLoadingState() : calorieSummary(mealData),
               Expanded(child:ListView(
                 shrinkWrap: true,
-                children: mealSummaries
+                children: mealData.isEmpty ? mealsLoadingState():mealSummaries,
                 )
               ),
             ],
@@ -215,8 +225,7 @@ class _HomePageState extends State<HomePage> {
 
   int calculateCaloriesFromFood() {
     int cals = 0;
-    List meals = SampleData.sampleHomeData[0]["MealEntriesData"];
-    for (var meal in meals) {
+    for (var meal in mealData) {
       for (var item in meal["items"]) {
         cals += item["calories"] as int;
       }
@@ -225,12 +234,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget calorieSummary(List meals) {
-    List sampleHomeData = SampleData.sampleHomeData;
     /*
     Eventually these will all be computed properties or fetched, but for now it'll be dummy data
     */
     int calsFromFood = calculateCaloriesFromFood();
-    int calsFromExercise = sampleHomeData[0]["SummaryCardData"]["CaloriesFromExercise"];
+    int calsFromExercise = 0;
     String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(
@@ -263,7 +271,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget mealSummary(LinkedHashMap<String, Object> meal) {
+  Widget mealSummary(LinkedHashMap<String, dynamic> meal) {
     List<Widget> items = [];
     for (var item in meal["items"] as List) {
       items.add(
@@ -305,4 +313,47 @@ class _HomePageState extends State<HomePage> {
       )
     );
   }
+
+  mealsLoadingState() {
+    List<Container> loadingState = [];
+    for (int i = 0; i < 4; i++) {
+      loadingState.add(
+        Container(
+          // This manages to maintain proper heights without using expanded
+          height: 200,
+          padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+          child: SizedBox.expand(
+            child: Card (
+              color: Color(0xFFEEEEEE),
+              shape: RoundedRectangleBorder(
+              // side: BorderSide(color: tfStyle.trifitColor[900]!, width: 2),
+                borderRadius: BorderRadius.circular(5)
+              )
+            )
+          )
+        )
+      );
+    }
+    return loadingState;
+  }
+
+  calorieSummaryLoadingState() {
+    return Container(
+      height: 140,
+      padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+      child: SizedBox.expand(
+        child: Card (
+          color: Color(0xFFEEEEEE),
+        )
+      )
+    );
+  }
+
+  loadJson() async {
+    String data = await rootBundle.loadString('lib/assets/SampleData.json');
+    var jsonResult = json.decode(data);
+    setState(() {
+      mealData = jsonResult["MealData"];
+    });
+  } 
 }

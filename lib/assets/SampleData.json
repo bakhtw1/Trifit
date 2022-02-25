@@ -1,15 +1,11 @@
-List sampleHomeData = [
   {
-    "SummaryCardData": {
-      "CaloriesFromExercise": 250,
-    },
-    "MealEntriesData": [
+    "MealData": [
       {
         "type": "Breakfast",
         "items": [
           {
             "name": "Banana",
-            "calories": 105,
+            "calories": 105
           },
           {
             "name": "Yogurt",
@@ -17,7 +13,7 @@ List sampleHomeData = [
           },
                     {
             "name": "Banana",
-            "calories": 105,
+            "calories": 105
           },
           {
             "name": "Yogurt",
@@ -30,7 +26,7 @@ List sampleHomeData = [
         "items": [
           {
             "name": "Chicken",
-            "calories": 250,
+            "calories": 250
           },
           {
             "name": "Rice",
@@ -43,7 +39,7 @@ List sampleHomeData = [
         "items": [
           {
             "name": "Oreos",
-            "calories": 300,
+            "calories": 300
           }
         ]
       },
@@ -52,7 +48,7 @@ List sampleHomeData = [
         "items": [
           {
             "name": "Ground Beef",
-            "calories": 400,
+            "calories": 400
           },
           {
             "name": "Potatoes",
@@ -62,4 +58,3 @@ List sampleHomeData = [
       }
     ]
   }
-];
