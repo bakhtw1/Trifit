@@ -58,26 +58,13 @@ class _HomePageState extends State<HomePage> {
     String error = "";
     String mealTypeDropdownValue = "";
     int numberOfItems = 1;
+    final _formKey = GlobalKey<FormState>();
 
     List<TextEditingController> itemControllers = [TextEditingController()];
     List<TextEditingController> calorieControllers = [TextEditingController()];
 
     List<Widget> itemRows = [
-              Row(
-                children: [ 
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                    controller: itemControllers[0],
-                    decoration: InputDecoration(hintText: "Item"),
-                  )),
-                  SizedBox(width: 20),
-                     Expanded(child: TextFormField(
-                    controller: calorieControllers[0],
-                    decoration: InputDecoration(hintText: "Calories"),
-                  )),
-                ],
-              ),
+      newItemRow(itemControllers[0], calorieControllers[0])
     ];
 
     showDialog(
@@ -91,60 +78,65 @@ class _HomePageState extends State<HomePage> {
           content: Container(
               width: MediaQuery.of(context).size.width*0.8,
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft, 
-                      child: Row(
-                        children: [
-                          Container(
-                            child: DropdownMenu(
-                              onValueSelected: (String value) { mealTypeDropdownValue = value; },
-                              dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
-                              placeholderText: "Meal Type",
-                            )
-                          ),
-                          SizedBox(width: 20),
-                          DropdownMenu(
-                            onValueSelected: (String value) { 
-                              setState(() {
-                                numberOfItems = int.parse(value);
-                                // Add rows to the end of the list if the new number is greater than the previous number
-                                if (numberOfItems > itemRows.length) {
-                                  int numberOfNewRows = numberOfItems - itemRows.length;
-                                  for (int i = 0; i < numberOfNewRows; i++) {
-                                    var newItemController = TextEditingController();
-                                    var newCalorieController = TextEditingController();
-                                    itemControllers.add(newItemController);
-                                    calorieControllers.add(newCalorieController);
-                                    itemRows.add(newItemRow(newItemController, newCalorieController));
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft, 
+                        child: Row(
+                          children: [
+                            Container(
+                              child: DropdownMenu(
+                                onValueSelected: (String value) { mealTypeDropdownValue = value; },
+                                dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
+                                placeholderText: "Meal Type",
+                                flex: 3,
+                              )
+                            ),
+                            SizedBox(width: 20),
+                            DropdownMenu(
+                              onValueSelected: (String value) { 
+                                setState(() {
+                                  numberOfItems = int.parse(value);
+                                  // Add rows to the end of the list if the new number is greater than the previous number
+                                  if (numberOfItems > itemRows.length) {
+                                    int numberOfNewRows = numberOfItems - itemRows.length;
+                                    for (int i = 0; i < numberOfNewRows; i++) {
+                                      var newItemController = TextEditingController();
+                                      var newCalorieController = TextEditingController();
+                                      itemControllers.add(newItemController);
+                                      calorieControllers.add(newCalorieController);
+                                      itemRows.add(newItemRow(newItemController, newCalorieController));
+                                    }
+                                  } 
+                                  // Remove rows from the end of the list if the new number is less than the current number of items
+                                  else if (numberOfItems < itemRows.length) {
+                                    int numberOfItemsToRemove = itemRows.length - numberOfItems;
+                                    for (int i = 0; i < numberOfItemsToRemove; i++) {
+                                      itemRows.removeLast();
+                                      itemControllers.removeLast();
+                                      calorieControllers.removeLast();
+                                    }
                                   }
-                                } 
-                                // Remove rows from the end of the list if the new number is less than the current number of items
-                                else if (numberOfItems < itemRows.length) {
-                                  int numberOfItemsToRemove = itemRows.length - numberOfItems;
-                                  for (int i = 0; i < numberOfItemsToRemove; i++) {
-                                    itemRows.removeLast();
-                                    itemControllers.removeLast();
-                                    calorieControllers.removeLast();
-                                  }
-                                }
-                              });
-                            },
-                            dropdownOptions: ["1", "2", "3", "4"],
-                            placeholderText: " ",
-                            // This sets 1 to be the default selected item
-                            isDefaultValueFirstItem: numberOfItems == 1,
-                          ),
-                          SizedBox(width: 10),
-                          Text("Items")
-                        ],
-                      )
-                    ),
-                    ...itemRows,
-                    SizedBox(height: 20),
-                    Align(alignment: Alignment.topLeft, child: Text(error, style: tfStyle.errorTextStyle)),
-                  ],
+                                });
+                              },
+                              dropdownOptions: ["1", "2", "3", "4", "5", "6"],
+                              placeholderText: " ",
+                              // This sets 1 to be the default selected item
+                              isDefaultValueFirstItem: numberOfItems == 1,
+                            ),
+                            SizedBox(width: 10),
+                            Text("Items")
+                          ],
+                        )
+                      ),
+                      SizedBox(height: 20),
+                      ...itemRows,
+                      SizedBox(height: 20),
+                      Align(alignment: Alignment.topLeft, child: Text(error, style: tfStyle.errorTextStyle)),
+                    ],
+                  )
                 )
             ),
           ),
@@ -155,14 +147,12 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () {
-                var errorString = validateMeal(mealTypeDropdownValue, itemControllers, calorieControllers);
-                if (errorString == "") {
-                  makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
+                if (_formKey.currentState!.validate()) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
+                  );
                   Navigator.pop(context);
-                } else {
-                  setState(() {
-                    error = errorString;
-                  });
+                  makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
                 }
               },
               child: Text('Add'),
@@ -173,31 +163,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  String validateMeal(String mealType, List<TextEditingController> itemControllers, List<TextEditingController> calorieControllers) {
-    String errorString = "";
-    for (int i = 0; i < itemControllers.length; i++) {
-      if (itemControllers[i].text == "" && !errorString.contains("- Item names must not be empty")) {
-          errorString += "- Item names must not be empty\n";
-      }
-      if (calorieControllers[i].text == "" && !errorString.contains("- Item calories must not be empty")) {
-        errorString += "- Item calories must not be empty\n";
-      }
-      else if (num.tryParse(calorieControllers[i].text) == null && !errorString.contains("- Item calories must be a number") && !errorString.contains("- Item calories must not be empty")) {
-        errorString += "- Item calories must be a number\n";
-      }
-    }
-    if (mealType == "" && !mealType.contains("- Meal type must be selected")) {
-      errorString += "- Meal type must be selected\n";
-    }
-    return errorString;
-  }
-
   MealModel makeMealModel(String mealType, List<TextEditingController> itemControllers, List<TextEditingController> calorieControllers) {
     List<Item> items = [];
     for (int i = 0; i < itemControllers.length; i++) {
       items.add(Item(itemControllers[i].text, int.parse(calorieControllers[i].text)));
     }
-    return MealModel(items, mealType);
+    var mealModel = MealModel(items, mealType);
+    print(mealModel.mealType);
+    for (var item in mealModel.items) {
+      print(item.name + " " + item.calories.toString() + "\n");
+    }
+    return mealModel;
   }
 
   Row newItemRow(TextEditingController itemController, TextEditingController calorieController) {
@@ -210,7 +186,7 @@ class _HomePageState extends State<HomePage> {
             decoration: InputDecoration(hintText: "Item"),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter some text';
+                return 'Required';
               }
               return null;
             },
@@ -222,6 +198,15 @@ class _HomePageState extends State<HomePage> {
               keyboardType: TextInputType.number,
               controller: calorieController,
               decoration: InputDecoration(hintText: "Calories"),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Required';
+                }
+                if (num.tryParse(value) == null) {
+                  return 'Must be number';
+                }
+                return null;
+              },
             )
         ),
       ],
