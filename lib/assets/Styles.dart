@@ -24,6 +24,10 @@ Map<int, Color> trifitColor =
     900:Color.fromRGBO(165, 69, 204, 1),
   };
 
-  TextStyle homeCardTitleTextStyle = TextStyle(
-    fontSize: 24,
-  );
+TextStyle homeCardTitleTextStyle = const TextStyle(
+  fontSize: 24,
+);
+
+TextStyle errorTextStyle = const TextStyle(
+  color: Colors.red,
+);

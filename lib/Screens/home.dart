@@ -55,6 +55,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showMealEntryDialog() {
+    String error = "";
     String mealTypeDropdownValue = "";
     int numberOfItems = 1;
 
@@ -96,10 +97,12 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.topLeft, 
                       child: Row(
                         children: [
-                          DropdownMenu(
-                            onValueSelected: (String value) { mealTypeDropdownValue = value; },
-                            dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
-                            placeholderText: "Meal Type",
+                          Container(
+                            child: DropdownMenu(
+                              onValueSelected: (String value) { mealTypeDropdownValue = value; },
+                              dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
+                              placeholderText: "Meal Type",
+                            )
                           ),
                           SizedBox(width: 20),
                           DropdownMenu(
@@ -139,6 +142,8 @@ class _HomePageState extends State<HomePage> {
                       )
                     ),
                     ...itemRows,
+                    SizedBox(height: 20),
+                    Align(alignment: Alignment.topLeft, child: Text(error, style: tfStyle.errorTextStyle)),
                   ],
                 )
             ),
@@ -150,8 +155,15 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               onPressed: () {
-                makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
-                Navigator.pop(context);
+                var errorString = validateMeal(mealTypeDropdownValue, itemControllers, calorieControllers);
+                if (errorString == "") {
+                  makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
+                  Navigator.pop(context);
+                } else {
+                  setState(() {
+                    error = errorString;
+                  });
+                }
               },
               child: Text('Add'),
             ),
@@ -159,6 +171,25 @@ class _HomePageState extends State<HomePage> {
         );});
       },
     );
+  }
+
+  String validateMeal(String mealType, List<TextEditingController> itemControllers, List<TextEditingController> calorieControllers) {
+    String errorString = "";
+    for (int i = 0; i < itemControllers.length; i++) {
+      if (itemControllers[i].text == "" && !errorString.contains("- Item names must not be empty")) {
+          errorString += "- Item names must not be empty\n";
+      }
+      if (calorieControllers[i].text == "" && !errorString.contains("- Item calories must not be empty")) {
+        errorString += "- Item calories must not be empty\n";
+      }
+      else if (num.tryParse(calorieControllers[i].text) == null && !errorString.contains("- Item calories must be a number") && !errorString.contains("- Item calories must not be empty")) {
+        errorString += "- Item calories must be a number\n";
+      }
+    }
+    if (mealType == "" && !mealType.contains("- Meal type must be selected")) {
+      errorString += "- Meal type must be selected\n";
+    }
+    return errorString;
   }
 
   MealModel makeMealModel(String mealType, List<TextEditingController> itemControllers, List<TextEditingController> calorieControllers) {
@@ -177,6 +208,12 @@ class _HomePageState extends State<HomePage> {
           child: TextFormField(
             controller: itemController,
             decoration: InputDecoration(hintText: "Item"),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
           )
         ),
         SizedBox(width: 20),
