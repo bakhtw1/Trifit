@@ -6,8 +6,9 @@ class DropdownMenu extends StatefulWidget {
   final List<String> dropdownOptions;
   final String placeholderText;
   bool isDefaultValueFirstItem;
+  bool isRequired;
   int flex;
-  DropdownMenu({required this.onValueSelected, required this.dropdownOptions, required this.placeholderText, this.isDefaultValueFirstItem = false, this.flex = 1});
+  DropdownMenu({required this.onValueSelected, required this.dropdownOptions, required this.placeholderText, this.isDefaultValueFirstItem = false, this.flex = 1, this.isRequired = true});
 
   @override
   _DropdownMenuState createState() => _DropdownMenuState();
@@ -30,15 +31,15 @@ class _DropdownMenuState extends State<DropdownMenu> {
       flex: widget.flex,
       child: DropdownButtonFormField<String>(
         validator: (value) {
-          if (value == null) {
-            return "Select an option";
+          if (value == null && widget.isRequired) {
+            return "Required";
           }
         },
         items: menuItems,
         onChanged: (String? value) {
           setState(() {
             _value = value;
-            widget.onValueSelected(value!); // call the function passing the value
+            widget.onValueSelected(value!); // Pass the value back to the parent
           });
         },
         hint: Text(widget.placeholderText),

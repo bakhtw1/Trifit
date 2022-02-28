@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:trifit/models/MealModel.dart';
 import '../assets/Styles.dart' as tfStyle;
 import '../components/dropdown.dart';
+import '../utilities/FileReadWrite.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,37 +18,48 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-  List mealData =  [];
-  List<Widget> mealSummaries = [];
+  
+  // Need to call loadJson while initializing the screen
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       await loadJson();
-      print("Loaded data");
     });
   }
 
+  // The meal data and the cards that will display the data
+  List mealData =  [];
+  List<Widget> mealCards = [];
+  List<MealModel> mealModels = [];
+  bool isLoading = true;
+
   @override
   Widget build(BuildContext context) {
+    // Insert a blank space at the bottom of the list so the last items are easily viewable. 140 is the default height of a meal card
+    // Need to check if data has been loaded yet before adding this block
+    // if (mealData.isNotEmpty) {
+    //   mealCards.insert(mealCards.length, SizedBox(height: 140));
+    // }
+    mealCards = [];
     for (var meal in mealData) {
-      mealSummaries.add(mealSummary(meal));
+      mealCards.add(mealCard(meal));
     }
-    // This is so that there's white space at the bottom of the list so the last items are easily viewable. 140 is the default height of a card
-    if (mealData.isNotEmpty) { mealSummaries.insert(mealSummaries.length, SizedBox(height: 140)); }
+
     return Stack(
         children: [
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              mealData.isEmpty? calorieSummaryLoadingState() : calorieSummary(mealData),
-              Expanded(child:ListView(
-                shrinkWrap: true,
-                children: mealData.isEmpty ? mealsLoadingState():mealSummaries,
+              // Calorie summary card
+              isLoading ? calorieSummaryLoadingState() : calorieSummary(mealData), // Calorie summary if data has been fetched, loading state if not
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: isLoading ? mealsLoadingState() : [...mealCards, SizedBox(height: 140)], // Populate with meal cards if data has been fetched, loading state if not
                 )
               ),
-            ],
+            ]
           ),
           Positioned(
             bottom: 10,
@@ -54,7 +67,14 @@ class _HomePageState extends State<HomePage> {
             child: FloatingActionButton(
               backgroundColor: tfStyle.trifitColor[700],
               onPressed: () {
-                showMealEntryDialog();
+                var newMeal;
+                showMealEntryDialog((value) {
+                  newMeal = value;
+                  setState(() {
+                    //mealData.add(newMeal);
+                  });
+                });
+
               },
               tooltip: 'Add a new entry',
               child: const Icon(Icons.add),
@@ -64,12 +84,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void showMealEntryDialog() {
+  void showMealEntryDialog(reload) {
     String error = "";
     String mealTypeDropdownValue = "";
     int numberOfItems = 1;
     final _formKey = GlobalKey<FormState>();
-
+    
     List<TextEditingController> itemControllers = [TextEditingController()];
     List<TextEditingController> calorieControllers = [TextEditingController()];
 
@@ -81,94 +101,104 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) {
       return StatefulBuilder(
-      builder: (context, setState) {
-        return AlertDialog(
-          title: Text('Enter a meal'),
-          insetPadding: EdgeInsets.zero,
-          content: Container(
-              width: MediaQuery.of(context).size.width*0.8,
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.topLeft, 
-                        child: Row(
-                          children: [
-                            Container(
-                              child: DropdownMenu(
-                                onValueSelected: (String value) { mealTypeDropdownValue = value; },
-                                dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
-                                placeholderText: "Meal Type",
-                                flex: 3,
-                              )
-                            ),
-                            SizedBox(width: 20),
-                            DropdownMenu(
-                              onValueSelected: (String value) { 
-                                setState(() {
-                                  numberOfItems = int.parse(value);
-                                  // Add rows to the end of the list if the new number is greater than the previous number
-                                  if (numberOfItems > itemRows.length) {
-                                    int numberOfNewRows = numberOfItems - itemRows.length;
-                                    for (int i = 0; i < numberOfNewRows; i++) {
-                                      var newItemController = TextEditingController();
-                                      var newCalorieController = TextEditingController();
-                                      itemControllers.add(newItemController);
-                                      calorieControllers.add(newCalorieController);
-                                      itemRows.add(newItemRow(newItemController, newCalorieController));
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Enter a meal'),
+            insetPadding: EdgeInsets.zero,
+            content: Container(
+                width: MediaQuery.of(context).size.width*0.8,
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.topLeft, 
+                          child: Row(
+                            children: [
+                              Container(
+                                child: DropdownMenu(
+                                  onValueSelected: (String value) { mealTypeDropdownValue = value; },
+                                  dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
+                                  placeholderText: "Meal Type",
+                                  flex: 3,
+                                )
+                              ),
+                              SizedBox(width: 20),
+                              DropdownMenu(
+                                onValueSelected: (String value) { 
+                                  setState(() {
+                                    numberOfItems = int.parse(value);
+                                    // Add rows to the end of the list if the new number is greater than the previous number
+                                    if (numberOfItems > itemRows.length) {
+                                      int numberOfNewRows = numberOfItems - itemRows.length;
+                                      for (int i = 0; i < numberOfNewRows; i++) {
+                                        var newItemController = TextEditingController();
+                                        var newCalorieController = TextEditingController();
+                                        itemControllers.add(newItemController);
+                                        calorieControllers.add(newCalorieController);
+                                        itemRows.add(newItemRow(newItemController, newCalorieController));
+                                      }
+                                    } 
+                                    // Remove rows from the end of the list if the new number is less than the current number of items
+                                    else if (numberOfItems < itemRows.length) {
+                                      int numberOfItemsToRemove = itemRows.length - numberOfItems;
+                                      for (int i = 0; i < numberOfItemsToRemove; i++) {
+                                        itemRows.removeLast();
+                                        itemControllers.removeLast();
+                                        calorieControllers.removeLast();
+                                      }
                                     }
-                                  } 
-                                  // Remove rows from the end of the list if the new number is less than the current number of items
-                                  else if (numberOfItems < itemRows.length) {
-                                    int numberOfItemsToRemove = itemRows.length - numberOfItems;
-                                    for (int i = 0; i < numberOfItemsToRemove; i++) {
-                                      itemRows.removeLast();
-                                      itemControllers.removeLast();
-                                      calorieControllers.removeLast();
-                                    }
-                                  }
-                                });
-                              },
-                              dropdownOptions: ["1", "2", "3", "4", "5", "6"],
-                              placeholderText: " ",
-                              // This sets 1 to be the default selected item
-                              isDefaultValueFirstItem: numberOfItems == 1,
-                            ),
-                            SizedBox(width: 10),
-                            Text("Items")
-                          ],
-                        )
-                      ),
-                      SizedBox(height: 20),
-                      ...itemRows,
-                      SizedBox(height: 20),
-                      Align(alignment: Alignment.topLeft, child: Text(error, style: tfStyle.errorTextStyle)),
-                    ],
+                                  });
+                                },
+                                dropdownOptions: ["1", "2", "3", "4", "5", "6"],
+                                placeholderText: " ",
+                                // This sets 1 to be the default selected item
+                                isDefaultValueFirstItem: numberOfItems == 1,
+                              ),
+                              SizedBox(width: 10),
+                              Text("Items")
+                            ],
+                          )
+                        ),
+                        SizedBox(height: 20),
+                        ...itemRows,
+                        SizedBox(height: 20),
+                        Align(alignment: Alignment.topLeft, child: Text(error, style: tfStyle.errorTextStyle)),
+                      ],
+                    )
                   )
-                )
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
-                  );
-                  Navigator.pop(context);
-                  makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
-                }
-              },
-              child: Text('Add'),
-            ),
-          ],
-        );});
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      var meal = makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
+                      var file = FileReadWrite("data.json");
+                      mealData.add(meal.toJson());
+                      file.write(jsonEncode(mealData));
+                      print(jsonEncode(mealData));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
+                      );
+                      () async {
+                        await loadJson();
+                      };
+                      reload(meal.toJson());
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text('Add'),
+                ),
+              ],
+            );
+          }
+        );
       },
     );
   }
@@ -178,11 +208,7 @@ class _HomePageState extends State<HomePage> {
     for (int i = 0; i < itemControllers.length; i++) {
       items.add(Item(itemControllers[i].text, int.parse(calorieControllers[i].text)));
     }
-    var mealModel = MealModel(items, mealType);
-    print(mealModel.mealType);
-    for (var item in mealModel.items) {
-      print(item.name + " " + item.calories.toString() + "\n");
-    }
+    var mealModel = MealModel(items, mealType, DateTime.now());
     return mealModel;
   }
 
@@ -271,7 +297,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget mealSummary(LinkedHashMap<String, dynamic> meal) {
+  mealCard(Map<String, dynamic> meal) {
     List<Widget> items = [];
     for (var item in meal["items"] as List) {
       items.add(
@@ -279,9 +305,9 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.only(top: 5, bottom: 5),
         child: Row(
           children: [
-            Text(item["name"]),
+            Text(item["name"], style: tfStyle.cardBodyTextStyle),
             Spacer(),
-            Text(item["calories"].toString())
+            Text(item["calories"].toString() + " cals", style: tfStyle.cardBodyTextStyle),
           ],
         )
         )
@@ -295,18 +321,17 @@ class _HomePageState extends State<HomePage> {
         child: Card (
           color: Color(0xFFEEEEEE),
           shape: RoundedRectangleBorder(
-           // side: BorderSide(color: tfStyle.trifitColor[900]!, width: 2),
             borderRadius: BorderRadius.circular(5)
           ),
-          child: Padding(padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(meal["type"] as String, style: tfStyle.homeCardTitleTextStyle),
-                  SizedBox(height: 10),
-                  Column(children: items)
-                ],
-              
+          child: Padding(
+            padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(meal["type"] as String, style: tfStyle.homeCardTitleTextStyle),
+                SizedBox(height: 10),
+                Column(children: items)
+              ],
             )
           )
         )
@@ -326,7 +351,6 @@ class _HomePageState extends State<HomePage> {
             child: Card (
               color: Color(0xFFEEEEEE),
               shape: RoundedRectangleBorder(
-              // side: BorderSide(color: tfStyle.trifitColor[900]!, width: 2),
                 borderRadius: BorderRadius.circular(5)
               )
             )
@@ -349,11 +373,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+// In the future this will be used to make a network call to fetch the data, for now it's using a local json file
   loadJson() async {
-    String data = await rootBundle.loadString('lib/assets/SampleData.json');
-    var jsonResult = json.decode(data);
+    isLoading = true;
+    //await Future.delayed(Duration(seconds: 1)); // Uncomment to verify loading states working
+    var file = FileReadWrite("data.json");
+    String data = await file.read();
+    dynamic jsonResult;
+    try { jsonResult = json.decode(data); } on Exception catch (_) {
+      jsonResult = [];
+      isLoading = false;
+    }
+    //print(jsonResult);
     setState(() {
-      mealData = jsonResult["MealData"];
+      mealData = jsonResult;
+      isLoading = false;
     });
   } 
 }

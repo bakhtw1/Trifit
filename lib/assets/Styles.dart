@@ -31,3 +31,7 @@ TextStyle homeCardTitleTextStyle = const TextStyle(
 TextStyle errorTextStyle = const TextStyle(
   color: Colors.red,
 );
+
+TextStyle cardBodyTextStyle = const TextStyle(
+  fontSize: 16
+);
