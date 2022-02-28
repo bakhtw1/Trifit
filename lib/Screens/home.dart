@@ -182,7 +182,6 @@ class _HomePageState extends State<HomePage> {
                       var file = FileReadWrite("data.json");
                       mealData.add(meal.toJson());
                       file.write(jsonEncode(mealData));
-                      print(jsonEncode(mealData));
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
                       );
@@ -384,7 +383,6 @@ class _HomePageState extends State<HomePage> {
       jsonResult = [];
       isLoading = false;
     }
-    //print(jsonResult);
     setState(() {
       mealData = jsonResult;
       isLoading = false;

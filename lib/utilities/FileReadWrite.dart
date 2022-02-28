@@ -17,7 +17,6 @@ class FileReadWrite {
 
   Future<File> get _localFile async {
     final path = await _localPath;
-    print(path);
     return File('$path/$fileName');
   }
 
