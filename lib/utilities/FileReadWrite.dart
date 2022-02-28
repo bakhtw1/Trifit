@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+// 
+// This is a generic read/write utility that can be used in any class
+// Create a new instance with `var file = FileReadWrite(<filename>)`
+// Write to the file with `file.write(<some string>)`
+// Read from the file with `file.read()`
+// 
 class FileReadWrite {
   late String fileName;
 
@@ -17,6 +21,7 @@ class FileReadWrite {
 
   Future<File> get _localFile async {
     final path = await _localPath;
+    print(path);
     return File('$path/$fileName');
   }
 
@@ -40,14 +45,14 @@ class FileReadWrite {
     return file.writeAsString('$contents');
   }
 
-    Future<int> deleteFile() async {
-      try {
-        final file = await _localFile;
+  Future<int> deleteFile() async {
+    try {
+      final file = await _localFile;
 
-        await file.delete();
-        return 0;
-      } catch (e) {
-        return 1;
-      }
+      await file.delete();
+      return 0;
+    } catch (e) {
+      return 1;
     }
+  }
 }

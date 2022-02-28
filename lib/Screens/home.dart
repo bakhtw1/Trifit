@@ -1,14 +1,12 @@
-import 'dart:collection';
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:trifit/models/MealModel.dart';
-import '../assets/Styles.dart' as tfStyle;
+import '../assets/Styles.dart' as tfstyle;
 import '../components/dropdown.dart';
 import '../utilities/FileReadWrite.dart';
+import 'package:intl/intl.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -30,19 +28,20 @@ class _HomePageState extends State<HomePage> {
 
   // The meal data and the cards that will display the data
   List mealData =  [];
+  List selectedMealData = [];
   List<Widget> mealCards = [];
   List<MealModel> mealModels = [];
   bool isLoading = true;
+  DateTime selectedDate = DateTime.now();
+  bool isDecrementDateButtonDisabled = false;
+  bool isIncrementDateButtonDisabled = true;
 
   @override
   Widget build(BuildContext context) {
-    // Insert a blank space at the bottom of the list so the last items are easily viewable. 140 is the default height of a meal card
-    // Need to check if data has been loaded yet before adding this block
-    // if (mealData.isNotEmpty) {
-    //   mealCards.insert(mealCards.length, SizedBox(height: 140));
-    // }
+    selectedDate = simpleDate(selectedDate);
+
     mealCards = [];
-    for (var meal in mealData) {
+    for (var meal in selectedMealData) {
       mealCards.add(mealCard(meal));
     }
 
@@ -51,8 +50,26 @@ class _HomePageState extends State<HomePage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios),
+                      onPressed: isDecrementDateButtonDisabled ? null : () {incrementSelectedDate(-1);},
+                    ),
+                    selectedDateLabel(),
+                    IconButton(
+                      icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: isIncrementDateButtonDisabled ? null : () {incrementSelectedDate(1);},
+                    )
+                  ],
+                )
+              ),
+
               // Calorie summary card
-              isLoading ? calorieSummaryLoadingState() : calorieSummary(mealData), // Calorie summary if data has been fetched, loading state if not
+              isLoading ? calorieSummaryLoadingState() : calorieSummary(selectedMealData), // Calorie summary if data has been fetched, loading state if not
               Expanded(
                 child: ListView(
                   shrinkWrap: true,
@@ -65,13 +82,12 @@ class _HomePageState extends State<HomePage> {
             bottom: 10,
             right: 10,
             child: FloatingActionButton(
-              backgroundColor: tfStyle.trifitColor[700],
+              backgroundColor: tfstyle.trifitColor[700],
               onPressed: () {
                 var newMeal;
-                showMealEntryDialog((value) {
-                  newMeal = value;
+                showMealEntryDialog(() {
                   setState(() {
-                    //mealData.add(newMeal);
+                    loadJson();
                   });
                 });
 
@@ -164,7 +180,7 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(height: 20),
                         ...itemRows,
                         SizedBox(height: 20),
-                        Align(alignment: Alignment.topLeft, child: Text(error, style: tfStyle.errorTextStyle)),
+                        Align(alignment: Alignment.topLeft, child: Text(error, style: tfstyle.errorTextStyle)),
                       ],
                     )
                   )
@@ -185,10 +201,7 @@ class _HomePageState extends State<HomePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
                       );
-                      () async {
-                        await loadJson();
-                      };
-                      reload(meal.toJson());
+                      reload();
                       Navigator.pop(context);
                     }
                   },
@@ -207,7 +220,7 @@ class _HomePageState extends State<HomePage> {
     for (int i = 0; i < itemControllers.length; i++) {
       items.add(Item(itemControllers[i].text, int.parse(calorieControllers[i].text)));
     }
-    var mealModel = MealModel(items, mealType, DateTime.now());
+    var mealModel = MealModel(items, mealType, selectedDate);
     return mealModel;
   }
 
@@ -250,7 +263,7 @@ class _HomePageState extends State<HomePage> {
 
   int calculateCaloriesFromFood() {
     int cals = 0;
-    for (var meal in mealData) {
+    for (var meal in selectedMealData) {
       for (var item in meal["items"]) {
         cals += item["calories"] as int;
       }
@@ -259,9 +272,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget calorieSummary(List meals) {
-    /*
-    Eventually these will all be computed properties or fetched, but for now it'll be dummy data
-    */
     int calsFromFood = calculateCaloriesFromFood();
     int calsFromExercise = 0;
     String netCals = (calsFromFood - calsFromExercise).toString();
@@ -282,9 +292,9 @@ class _HomePageState extends State<HomePage> {
                     child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(children: [Text(calsFromFood.toString(), style: tfStyle.homeCardTitleTextStyle), Text("Food")]),
-                      Column(children: [Text(calsFromExercise.toString(), style: tfStyle.homeCardTitleTextStyle), Text("Exercise")]),
-                      Column(children: [Text(netCals, style: tfStyle.homeCardTitleTextStyle) ,Text("Net")]),
+                      Column(children: [Text(calsFromFood.toString(), style: tfstyle.homeCardTitleTextStyle), Text("Food")]),
+                      Column(children: [Text(calsFromExercise.toString(), style: tfstyle.homeCardTitleTextStyle), Text("Exercise")]),
+                      Column(children: [Text(netCals, style: tfstyle.homeCardTitleTextStyle) ,Text("Net")]),
                     ],
                   )
                 )
@@ -304,9 +314,9 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.only(top: 5, bottom: 5),
         child: Row(
           children: [
-            Text(item["name"], style: tfStyle.cardBodyTextStyle),
+            Text(item["name"], style: tfstyle.cardBodyTextStyle),
             Spacer(),
-            Text(item["calories"].toString() + " cals", style: tfStyle.cardBodyTextStyle),
+            Text(item["calories"].toString() + " cals", style: tfstyle.cardBodyTextStyle),
           ],
         )
         )
@@ -327,7 +337,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(meal["type"] as String, style: tfStyle.homeCardTitleTextStyle),
+                Text(meal["type"] as String, style: tfstyle.homeCardTitleTextStyle),
                 SizedBox(height: 10),
                 Column(children: items)
               ],
@@ -385,7 +395,41 @@ class _HomePageState extends State<HomePage> {
     }
     setState(() {
       mealData = jsonResult;
+      selectedMealData = mealData.where((i) => DateTime.parse(i["date"]) == selectedDate).toList();
       isLoading = false;
     });
-  } 
+  }
+
+  simpleDate(DateTime date) {
+    return new DateTime(date.year, date.month, date.day);
+  }
+
+  incrementSelectedDate(int addsub) {
+    setState(() {
+      selectedDate = addsub == 1 ? selectedDate.add(Duration(days: 1)) : selectedDate.subtract(Duration(days: 1));
+      if (selectedDate.difference(DateTime.now()).inDays == -6) {
+        isDecrementDateButtonDisabled = true;
+      } else if (selectedDate == simpleDate(DateTime.now())) {
+        isIncrementDateButtonDisabled = true;
+      } else {
+        isDecrementDateButtonDisabled = false;
+        isIncrementDateButtonDisabled = false;
+      }
+    });
+    loadJson();
+  }
+
+  selectedDateLabel() {
+    Text label;
+    if (selectedDate == simpleDate(DateTime.now())) {
+      label = Text("Today", style: tfstyle.homeCardTitleTextStyle);
+    }
+    else if (selectedDate == simpleDate(DateTime.now().subtract(Duration(days: 1)))) {
+      label = Text("Yesterday", style: tfstyle.homeCardTitleTextStyle);
+    }
+    else {
+      label = Text("${DateFormat.MMMM().format(selectedDate)} ${selectedDate.day}", style: tfstyle.homeCardTitleTextStyle);
+    }
+    return (Container(width: 200, child: Center(child: label)));
+  }
 }
