@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+//
+// A reusable dropdown menu class
+// onValueSelected - a callback function for what to do when a value is selected
+// dropdownOptions - The list of options that will appear in the dropdown
+// placeholderText - the default text that appears in the dropdown if nothing has been selected
+// isDefaultValueFirstItem - boolean that describes whether or not the first item in the list should be selected automatically, false by default
+// isRequired - boolean that describes whether or not a selection from the dropdown is required
+// flex - The flex value that describes the width of the dropdown proportionally to other elements near it (e.g. in a row), defaults to 1 (size is not modified)
+//
+
 class DropdownMenu extends StatefulWidget {
   // pass a callback to your widget to be able to get the selected value from a parent
   final Function(String) onValueSelected;

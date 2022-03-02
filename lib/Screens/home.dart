@@ -46,57 +46,56 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Stack(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
-                      onPressed: isDecrementDateButtonDisabled ? null : () {incrementSelectedDate(-1);},
-                    ),
-                    selectedDateLabel(),
-                    IconButton(
-                      icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: isIncrementDateButtonDisabled ? null : () {incrementSelectedDate(1);},
-                    )
-                  ],
-                )
-              ),
-
-              // Calorie summary card
-              isLoading ? calorieSummaryLoadingState() : calorieSummary(selectedMealData), // Calorie summary if data has been fetched, loading state if not
-              Expanded(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: isLoading ? mealsLoadingState() : [...mealCards, SizedBox(height: 140)], // Populate with meal cards if data has been fetched, loading state if not
-                )
-              ),
-            ]
-          ),
-          Positioned(
-            bottom: 10,
-            right: 10,
-            child: FloatingActionButton(
-              backgroundColor: tfstyle.trifitColor[700],
-              onPressed: () {
-                var newMeal;
-                showMealEntryDialog(() {
-                  setState(() {
-                    loadJson();
-                  });
-                });
-
-              },
-              tooltip: 'Add a new entry',
-              child: const Icon(Icons.add),
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: isDecrementDateButtonDisabled ? null : () {incrementSelectedDate(-1);},
+                  ),
+                  selectedDateLabel(),
+                  IconButton(
+                    icon: Icon(Icons.arrow_forward_ios),
+                    onPressed: isIncrementDateButtonDisabled ? null : () {incrementSelectedDate(1);},
+                  )
+                ],
+              )
             ),
-          )
-        ],
+
+            // Calorie summary card
+            isLoading ? calorieSummaryLoadingState() : calorieSummary(selectedMealData), // Calorie summary if data has been fetched, loading state if not
+            Expanded(
+              child: ListView(
+                shrinkWrap: true,
+                children: isLoading ? mealsLoadingState() : [...mealCards, SizedBox(height: 140)], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
+              )
+            ),
+          ]
+        ),
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: FloatingActionButton(
+            backgroundColor: tfstyle.trifitColor[700],
+            onPressed: () {
+              var newMeal;
+              showMealEntryDialog(() {
+                setState(() {
+                  loadJson();
+                });
+              });
+            },
+            tooltip: 'Add a new entry',
+            child: const Icon(Icons.add),
+          ),
+        )
+      ],
     );
   }
 
@@ -180,7 +179,6 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(height: 20),
                         ...itemRows,
                         SizedBox(height: 20),
-                        Align(alignment: Alignment.topLeft, child: Text(error, style: tfstyle.errorTextStyle)),
                       ],
                     )
                   )
