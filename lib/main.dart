@@ -62,6 +62,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 40,
         title: Text(_widgetOptionTitles.elementAt(_selectedIndex)),
       ),
       body: Center(
