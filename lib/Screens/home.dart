@@ -7,7 +7,6 @@ import '../components/dropdown.dart';
 import '../utilities/FileReadWrite.dart';
 import 'package:intl/intl.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
   final String pageTitle = "Home";
@@ -16,18 +15,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  
   // Need to call loadJson while initializing the screen
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       await loadJson();
     });
   }
 
   // The meal data and the cards that will display the data
-  List mealData =  [];
+  List mealData = [];
   List selectedMealData = [];
   List<Widget> mealCards = [];
   List<MealModel> mealModels = [];
@@ -47,37 +45,48 @@ class _HomePageState extends State<HomePage> {
 
     return Stack(
       children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Padding(
+        Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+          Padding(
               padding: EdgeInsets.only(top: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
                     icon: Icon(Icons.arrow_back_ios),
-                    onPressed: isDecrementDateButtonDisabled ? null : () {incrementSelectedDate(-1);},
+                    onPressed: isDecrementDateButtonDisabled
+                        ? null
+                        : () {
+                            incrementSelectedDate(-1);
+                          },
                   ),
                   selectedDateLabel(),
                   IconButton(
                     icon: Icon(Icons.arrow_forward_ios),
-                    onPressed: isIncrementDateButtonDisabled ? null : () {incrementSelectedDate(1);},
+                    onPressed: isIncrementDateButtonDisabled
+                        ? null
+                        : () {
+                            incrementSelectedDate(1);
+                          },
                   )
                 ],
-              )
-            ),
+              )),
 
-            // Calorie summary card
-            isLoading ? calorieSummaryLoadingState() : calorieSummary(selectedMealData), // Calorie summary if data has been fetched, loading state if not
-            Expanded(
+          // Calorie summary card
+          isLoading
+              ? calorieSummaryLoadingState()
+              : calorieSummary(
+                  selectedMealData), // Calorie summary if data has been fetched, loading state if not
+          Expanded(
               child: ListView(
-                shrinkWrap: true,
-                children: isLoading ? mealsLoadingState() : [...mealCards, SizedBox(height: 140)], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
-              )
-            ),
-          ]
-        ),
+            shrinkWrap: true,
+            children: isLoading
+                ? mealsLoadingState()
+                : [
+                    ...mealCards,
+                    SizedBox(height: 140)
+                  ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
+          )),
+        ]),
         Positioned(
           bottom: 10,
           right: 10,
@@ -104,7 +113,7 @@ class _HomePageState extends State<HomePage> {
     String mealTypeDropdownValue = "";
     int numberOfItems = 1;
     final _formKey = GlobalKey<FormState>();
-    
+
     List<TextEditingController> itemControllers = [TextEditingController()];
     List<TextEditingController> calorieControllers = [TextEditingController()];
 
@@ -115,146 +124,174 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
+        return StatefulBuilder(builder: (context, setState) {
           return AlertDialog(
             title: Text('Enter a meal'),
             insetPadding: EdgeInsets.zero,
             content: Container(
-                width: MediaQuery.of(context).size.width*0.8,
-                child: SingleChildScrollView(
+              width: MediaQuery.of(context).size.width * 0.8,
+              child: SingleChildScrollView(
                   child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: Alignment.topLeft, 
-                          child: Row(
-                            children: [
-                              Container(
-                                child: DropdownMenu(
-                                  onValueSelected: (String value) { mealTypeDropdownValue = value; },
-                                  dropdownOptions: ["Snack", "Breakfast", "Lunch", "Dinner"],
-                                  placeholderText: "Meal Type",
-                                  flex: 3,
-                                )
-                              ),
-                              SizedBox(width: 20),
-                              DropdownMenu(
-                                onValueSelected: (String value) { 
-                                  setState(() {
-                                    numberOfItems = int.parse(value);
-                                    // Add rows to the end of the list if the new number is greater than the previous number
-                                    if (numberOfItems > itemRows.length) {
-                                      int numberOfNewRows = numberOfItems - itemRows.length;
-                                      for (int i = 0; i < numberOfNewRows; i++) {
-                                        var newItemController = TextEditingController();
-                                        var newCalorieController = TextEditingController();
-                                        itemControllers.add(newItemController);
-                                        calorieControllers.add(newCalorieController);
-                                        itemRows.add(newItemRow(newItemController, newCalorieController));
-                                      }
-                                    } 
-                                    // Remove rows from the end of the list if the new number is less than the current number of items
-                                    else if (numberOfItems < itemRows.length) {
-                                      int numberOfItemsToRemove = itemRows.length - numberOfItems;
-                                      for (int i = 0; i < numberOfItemsToRemove; i++) {
-                                        itemRows.removeLast();
-                                        itemControllers.removeLast();
-                                        calorieControllers.removeLast();
-                                      }
-                                    }
-                                  });
-                                },
-                                dropdownOptions: ["1", "2", "3", "4", "5", "6"],
-                                placeholderText: " ",
-                                // This sets 1 to be the default selected item
-                                isDefaultValueFirstItem: numberOfItems == 1,
-                              ),
-                              SizedBox(width: 10),
-                              Text("Items")
-                            ],
-                          )
-                        ),
-                        SizedBox(height: 20),
-                        ...itemRows,
-                        SizedBox(height: 20),
-                      ],
-                    )
-                  )
-                ),
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Align(
+                              alignment: Alignment.topLeft,
+                              child: Row(
+                                children: [
+                                  Container(
+                                      child: DropdownMenu(
+                                    onValueSelected: (String value) {
+                                      mealTypeDropdownValue = value;
+                                    },
+                                    dropdownOptions: [
+                                      "Snack",
+                                      "Breakfast",
+                                      "Lunch",
+                                      "Dinner"
+                                    ],
+                                    placeholderText: "Meal Type",
+                                    flex: 3,
+                                  )),
+                                  SizedBox(width: 20),
+                                  DropdownMenu(
+                                    onValueSelected: (String value) {
+                                      setState(() {
+                                        numberOfItems = int.parse(value);
+                                        // Add rows to the end of the list if the new number is greater than the previous number
+                                        if (numberOfItems > itemRows.length) {
+                                          int numberOfNewRows =
+                                              numberOfItems - itemRows.length;
+                                          for (int i = 0;
+                                              i < numberOfNewRows;
+                                              i++) {
+                                            var newItemController =
+                                                TextEditingController();
+                                            var newCalorieController =
+                                                TextEditingController();
+                                            itemControllers
+                                                .add(newItemController);
+                                            calorieControllers
+                                                .add(newCalorieController);
+                                            itemRows.add(newItemRow(
+                                                newItemController,
+                                                newCalorieController));
+                                          }
+                                        }
+                                        // Remove rows from the end of the list if the new number is less than the current number of items
+                                        else if (numberOfItems <
+                                            itemRows.length) {
+                                          int numberOfItemsToRemove =
+                                              itemRows.length - numberOfItems;
+                                          for (int i = 0;
+                                              i < numberOfItemsToRemove;
+                                              i++) {
+                                            itemRows.removeLast();
+                                            itemControllers.removeLast();
+                                            calorieControllers.removeLast();
+                                          }
+                                        }
+                                      });
+                                    },
+                                    dropdownOptions: [
+                                      "1",
+                                      "2",
+                                      "3",
+                                      "4",
+                                      "5",
+                                      "6"
+                                    ],
+                                    placeholderText: " ",
+                                    // This sets 1 to be the default selected item
+                                    isDefaultValueFirstItem: numberOfItems == 1,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text("Items")
+                                ],
+                              )),
+                          SizedBox(height: 20),
+                          ...itemRows,
+                          SizedBox(height: 20),
+                        ],
+                      ))),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      var meal = makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
-                      var file = FileReadWrite("data.json");
-                      mealData.add(meal.toJson());
-                      file.write(jsonEncode(mealData));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
-                      );
-                      reload();
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: Text('Add'),
-                ),
-              ],
-            );
-          }
-        );
+              TextButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    var meal = makeMealModel(mealTypeDropdownValue,
+                        itemControllers, calorieControllers);
+                    var file = FileReadWrite("data.json");
+                    mealData.add(meal.toJson());
+                    file.write(jsonEncode(mealData));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Successfully added meal'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    reload();
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text('Add'),
+              ),
+            ],
+          );
+        });
       },
     );
   }
 
-  MealModel makeMealModel(String mealType, List<TextEditingController> itemControllers, List<TextEditingController> calorieControllers) {
+  MealModel makeMealModel(
+      String mealType,
+      List<TextEditingController> itemControllers,
+      List<TextEditingController> calorieControllers) {
     List<Item> items = [];
     for (int i = 0; i < itemControllers.length; i++) {
-      items.add(Item(itemControllers[i].text, int.parse(calorieControllers[i].text)));
+      items.add(
+          Item(itemControllers[i].text, int.parse(calorieControllers[i].text)));
     }
     var mealModel = MealModel(items, mealType, selectedDate);
     return mealModel;
   }
 
-  Row newItemRow(TextEditingController itemController, TextEditingController calorieController) {
+  Row newItemRow(TextEditingController itemController,
+      TextEditingController calorieController) {
     return Row(
-      children: [ 
+      children: [
         Expanded(
-          flex: 2,
-          child: TextFormField(
-            controller: itemController,
-            decoration: InputDecoration(hintText: "Item"),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Required';
-              }
-              return null;
-            },
-          )
-        ),
-        SizedBox(width: 20),
-          Expanded(
+            flex: 2,
             child: TextFormField(
-              keyboardType: TextInputType.number,
-              controller: calorieController,
-              decoration: InputDecoration(hintText: "Calories"),
+              controller: itemController,
+              decoration: InputDecoration(hintText: "Item"),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Required';
                 }
-                if (num.tryParse(value) == null) {
-                  return 'Must be number';
-                }
                 return null;
               },
-            )
-        ),
+            )),
+        SizedBox(width: 20),
+        Expanded(
+            child: TextFormField(
+          keyboardType: TextInputType.number,
+          controller: calorieController,
+          decoration: InputDecoration(hintText: "Calories"),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Required';
+            }
+            if (num.tryParse(value) == null) {
+              return 'Must be number';
+            }
+            return null;
+          },
+        )),
       ],
     );
   }
@@ -275,109 +312,105 @@ class _HomePageState extends State<HomePage> {
     String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(
-      height: 140,
-      padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
-          color: Color(0xFFEEEEEE),
-          child: Padding(padding: EdgeInsets.all(5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Calories", style: TextStyle(fontSize: 26)),
-                Padding(
-                  padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                    child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(children: [Text(calsFromFood.toString(), style: tfstyle.homeCardTitleTextStyle), Text("Food")]),
-                      Column(children: [Text(calsFromExercise.toString(), style: tfstyle.homeCardTitleTextStyle), Text("Exercise")]),
-                      Column(children: [Text(netCals, style: tfstyle.homeCardTitleTextStyle) ,Text("Net")]),
-                    ],
-                  )
-                )
-              ],
-            )
-          )
-        )
-      )
-    );
+        height: 140,
+        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+        child: SizedBox.expand(
+            child: Card(
+                color: Color(0xFFEEEEEE),
+                child: Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Calories", style: TextStyle(fontSize: 26)),
+                        Padding(
+                            padding: EdgeInsets.only(
+                                left: 20, right: 20, bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(children: [
+                                  Text(calsFromFood.toString(),
+                                      style: tfstyle.homeCardTitleTextStyle),
+                                  Text("Food")
+                                ]),
+                                Column(children: [
+                                  Text(calsFromExercise.toString(),
+                                      style: tfstyle.homeCardTitleTextStyle),
+                                  Text("Exercise")
+                                ]),
+                                Column(children: [
+                                  Text(netCals,
+                                      style: tfstyle.homeCardTitleTextStyle),
+                                  Text("Net")
+                                ]),
+                              ],
+                            ))
+                      ],
+                    )))));
   }
 
   mealCard(Map<String, dynamic> meal) {
     List<Widget> items = [];
     for (var item in meal["items"] as List) {
-      items.add(
-        Padding(
-        padding: EdgeInsets.only(top: 5, bottom: 5),
-        child: Row(
-          children: [
-            Text(item["name"], style: tfstyle.cardBodyTextStyle),
-            Spacer(),
-            Text(item["calories"].toString() + " cals", style: tfstyle.cardBodyTextStyle),
-          ],
-        )
-        )
-      );
+      items.add(Padding(
+          padding: EdgeInsets.only(top: 5, bottom: 5),
+          child: Row(
+            children: [
+              Text(item["name"], style: tfstyle.cardBodyTextStyle),
+              Spacer(),
+              Text(item["calories"].toString() + " cals",
+                  style: tfstyle.cardBodyTextStyle),
+            ],
+          )));
     }
     return Container(
-      // This manages to maintain proper heights without using expanded
-      height: 140 + (items.length - 2)*26,
-      padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
-          color: Color(0xFFEEEEEE),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5)
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(meal["type"] as String, style: tfstyle.homeCardTitleTextStyle),
-                SizedBox(height: 10),
-                Column(children: items)
-              ],
-            )
-          )
-        )
-      )
-    );
+        // This manages to maintain proper heights without using expanded
+        height: 140 + (items.length - 2) * 26,
+        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+        child: SizedBox.expand(
+            child: Card(
+                color: Color(0xFFEEEEEE),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                child: Padding(
+                    padding:
+                        EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(meal["type"] as String,
+                            style: tfstyle.homeCardTitleTextStyle),
+                        SizedBox(height: 10),
+                        Column(children: items)
+                      ],
+                    )))));
   }
 
   mealsLoadingState() {
     List<Container> loadingState = [];
     for (int i = 0; i < 4; i++) {
-      loadingState.add(
-        Container(
+      loadingState.add(Container(
           // This manages to maintain proper heights without using expanded
           height: 200,
           padding: EdgeInsets.only(left: 10, right: 10, top: 10),
           child: SizedBox.expand(
-            child: Card (
-              color: Color(0xFFEEEEEE),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5)
-              )
-            )
-          )
-        )
-      );
+              child: Card(
+                  color: Color(0xFFEEEEEE),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5))))));
     }
     return loadingState;
   }
 
   calorieSummaryLoadingState() {
     return Container(
-      height: 140,
-      padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
+        height: 140,
+        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
+        child: SizedBox.expand(
+            child: Card(
           color: Color(0xFFEEEEEE),
-        )
-      )
-    );
+        )));
   }
 
 // In the future this will be used to make a network call to fetch the data, for now it's using a local json file
@@ -387,13 +420,17 @@ class _HomePageState extends State<HomePage> {
     var file = FileReadWrite("data.json");
     String data = await file.read();
     dynamic jsonResult;
-    try { jsonResult = json.decode(data); } on Exception catch (_) {
+    try {
+      jsonResult = json.decode(data);
+    } on Exception catch (_) {
       jsonResult = [];
       isLoading = false;
     }
     setState(() {
       mealData = jsonResult;
-      selectedMealData = mealData.where((i) => DateTime.parse(i["date"]) == selectedDate).toList();
+      selectedMealData = mealData
+          .where((i) => DateTime.parse(i["date"]) == selectedDate)
+          .toList();
       isLoading = false;
     });
   }
@@ -404,7 +441,9 @@ class _HomePageState extends State<HomePage> {
 
   incrementSelectedDate(int addsub) {
     setState(() {
-      selectedDate = addsub == 1 ? selectedDate.add(Duration(days: 1)) : selectedDate.subtract(Duration(days: 1));
+      selectedDate = addsub == 1
+          ? selectedDate.add(Duration(days: 1))
+          : selectedDate.subtract(Duration(days: 1));
       if (selectedDate.difference(DateTime.now()).inDays == -6) {
         isDecrementDateButtonDisabled = true;
       } else if (selectedDate == simpleDate(DateTime.now())) {
@@ -421,12 +460,13 @@ class _HomePageState extends State<HomePage> {
     Text label;
     if (selectedDate == simpleDate(DateTime.now())) {
       label = Text("Today", style: tfstyle.homeCardTitleTextStyle);
-    }
-    else if (selectedDate == simpleDate(DateTime.now().subtract(Duration(days: 1)))) {
+    } else if (selectedDate ==
+        simpleDate(DateTime.now().subtract(Duration(days: 1)))) {
       label = Text("Yesterday", style: tfstyle.homeCardTitleTextStyle);
-    }
-    else {
-      label = Text("${DateFormat.MMMM().format(selectedDate)} ${selectedDate.day}", style: tfstyle.homeCardTitleTextStyle);
+    } else {
+      label = Text(
+          "${DateFormat.MMMM().format(selectedDate)} ${selectedDate.day}",
+          style: tfstyle.homeCardTitleTextStyle);
     }
     return (Container(width: 200, child: Center(child: label)));
   }

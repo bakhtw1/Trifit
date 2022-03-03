@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../assets/Styles.dart' as tfstyle;
 
 class Feed extends StatefulWidget {
   const Feed({Key? key}) : super(key: key);
@@ -8,16 +9,16 @@ class Feed extends StatefulWidget {
 }
 
 class _FeedState extends State<Feed> {
-
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(widget.pageTitle),
-          ],
-        ),
-      );
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: tfstyle.trifitColor[700],
+        onPressed: () {
+          //do something
+        },
+        child: Icon(Icons.add),
+      ),
+    );
   }
 }
