@@ -1,4 +1,8 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+
+import '../assets/Styles.dart' as tfstyle;
 
 class FeedItem extends StatefulWidget {
   final String dp;
@@ -19,7 +23,8 @@ class FeedItem extends StatefulWidget {
 }
 
 class _FeedItemState extends State<FeedItem> {
-  String imagecheck = " ";
+  bool onClick = false;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,28 +32,58 @@ class _FeedItemState extends State<FeedItem> {
       child: Card(
         elevation: 10,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        margin: EdgeInsets.all(15),
+        margin: EdgeInsets.all(20),
         child: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.all(25.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage("${widget.dp}"),
+                  Column(
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: NetworkImage("${widget.dp}"),
+                          ),
+                          SizedBox(width: 7),
+                          Text(
+                            widget.name,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 7),
-                  Text(widget.name)
+                  GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          onClick = !onClick;
+                        });
+                      },
+                      child: Icon(Icons.thumb_up,
+                          color:
+                              onClick ? tfstyle.trifitColor[700] : Colors.grey))
                 ],
               ),
               SizedBox(
                 height: 10,
               ),
               Text(widget.desc),
+              SizedBox(
+                height: 10,
+              ),
               Container(
-                // child: (widget.img != null) ? Image.network(widget.img) : null,
-                child: widget.img.isEmpty ? null : Image.network(widget.img),
+                height: widget.img.isEmpty ? 0 : 300,
+                width: widget.img.isEmpty ? 0 : 300,
+                child: widget.img.isEmpty
+                    ? null
+                    : Image.network(
+                        widget.img,
+                        fit: BoxFit.cover,
+                      ),
               )
             ],
           ),
@@ -56,4 +91,7 @@ class _FeedItemState extends State<FeedItem> {
       ),
     );
   }
+
+//ImagePicker instance.
+
 }

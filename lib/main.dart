@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'screens/screens.dart';
 import 'assets/Styles.dart' as tfStyle;
+
 void main() {
   runApp(const MyApp());
 }
@@ -15,8 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch:MaterialColor(0xFFA545CC, tfStyle.trifitColor)
-      ),
+          primarySwatch: MaterialColor(0xFFA545CC, tfStyle.trifitColor)),
       debugShowCheckedModeBanner: false,
       home: const MyStatefulWidget(),
     );
