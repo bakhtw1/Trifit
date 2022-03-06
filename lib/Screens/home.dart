@@ -353,7 +353,7 @@ class _HomePageState extends State<HomePage> {
   Widget calorieSummary(List meals) {
     int calsFromFood = calculateCaloriesFromFood();
     // Active walking calories can very loosely be calculated as 0.04 * number of steps
-    int calsFromExercise = isLoading ? 0 : (stepController.getStepsForDate(selectedDate)*0.04).ceil();
+    int calsFromExercise = isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
     String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(

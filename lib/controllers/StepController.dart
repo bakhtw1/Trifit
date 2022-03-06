@@ -17,6 +17,10 @@ class StepController {
     return filteredSteps;
   }
 
+  getActiveCaloriesForDate(DateTime date) {
+    return (getStepsForDate(date)*0.04).ceil();
+  }
+
   getStepsForDate(DateTime date) {
     var stepCount = 0.0;
     for (var step in allSteps) {
