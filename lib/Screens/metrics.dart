@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../components/LineChart.dart';
+
 class Metrics extends StatefulWidget {
   const Metrics({Key? key}) : super(key: key);
   final String pageTitle = "Metrics";
@@ -11,11 +13,12 @@ class _MetricsState extends State<Metrics> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+        body: ListView(
           children: <Widget>[
-            Text(widget.pageTitle),
+            LineChartCard(),
+            SizedBox(height: 20,),
+            LineChartCard()
           ],
         ),
       );
