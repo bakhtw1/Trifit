@@ -1,11 +1,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
-import '../assets/Styles.dart' as tfstyle;
+import 'package:trifit/models/StepModel.dart';
+import '../assets/Styles.dart';
 import '../components/dropdown.dart';
+import '../components/expandableFab.dart';
 import '../utilities/FileReadWrite.dart';
 import 'package:intl/intl.dart';
+
+import '../utilities/UtilityFunctions.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -21,7 +26,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       await loadJson();
     });
   }
@@ -35,6 +40,8 @@ class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now();
   bool isDecrementDateButtonDisabled = false;
   bool isIncrementDateButtonDisabled = true;
+  List steps = [];
+  var stepController = StepController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,57 +52,63 @@ class _HomePageState extends State<HomePage> {
       mealCards.add(mealCard(meal));
     }
 
-    return Stack(
-      children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back_ios),
-                    onPressed: isDecrementDateButtonDisabled ? null : () {incrementSelectedDate(-1);},
-                  ),
-                  selectedDateLabel(),
-                  IconButton(
-                    icon: Icon(Icons.arrow_forward_ios),
-                    onPressed: isIncrementDateButtonDisabled ? null : () {incrementSelectedDate(1);},
-                  )
-                ],
-              )
-            ),
-
-            // Calorie summary card
-            isLoading ? calorieSummaryLoadingState() : calorieSummary(selectedMealData), // Calorie summary if data has been fetched, loading state if not
-            Expanded(
-              child: ListView(
-                shrinkWrap: true,
-                children: isLoading ? mealsLoadingState() : [...mealCards, SizedBox(height: 140)], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
-              )
-            ),
-          ]
-        ),
-        Positioned(
-          bottom: 10,
-          right: 10,
-          child: FloatingActionButton(
-            backgroundColor: tfstyle.trifitColor[700],
-            onPressed: () {
-              var newMeal;
-              showMealEntryDialog(() {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios),
+                      onPressed: isDecrementDateButtonDisabled ? null : () {incrementSelectedDate(-1);},
+                    ),
+                    selectedDateLabel(),
+                    IconButton(
+                      icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: isIncrementDateButtonDisabled ? null : () {incrementSelectedDate(1);},
+                    )
+                  ],
+                )
+              ),
+    
+              // Calorie summary card
+              isLoading ? calorieSummaryLoadingState() : calorieSummary(selectedMealData), // Calorie summary if data has been fetched, loading state if not
+              Expanded(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: isLoading ? mealsLoadingState() : [...mealCards, SizedBox(height: 140)], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
+                )
+              ),
+            ]
+          ),
+        ],
+      ),
+      floatingActionButton: ExpandableFab(
+        distance: 60.0,
+        children: [
+          ActionButton(
+              onPressed: () => showStepEntryDialog(() => {
                 setState(() {
                   loadJson();
-                });
-              });
-            },
-            tooltip: 'Add a new entry',
-            child: const Icon(Icons.add),
+                })
+              }),
+              icon: const Icon(Icons.directions_walk_outlined),
           ),
-        )
-      ],
+          ActionButton(
+              onPressed: () => showMealEntryDialog(() => {
+                setState(() {
+                  loadJson();
+                })
+              }),
+              icon: const Icon(Icons.restaurant),
+          )
+        ],
+      ),
     );
   }
 
@@ -190,14 +203,82 @@ class _HomePageState extends State<HomePage> {
                   child: Text('Cancel'),
                 ),
                 TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       var meal = makeMealModel(mealTypeDropdownValue, itemControllers, calorieControllers);
-                      var file = FileReadWrite("data.json");
                       mealData.add(meal.toJson());
-                      file.write(jsonEncode(mealData));
+                      await writeJson("mealdata-${selectedDate}.json", jsonEncode(mealData));
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Successfully added meal'), backgroundColor: Colors.green,),
+                      );
+                      reload();
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text('Add'),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
+
+  void showStepEntryDialog(reload) {
+    final _formKey = GlobalKey<FormState>();
+    
+    TextEditingController stepTextController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Add steps'),
+            insetPadding: EdgeInsets.zero,
+            content: Container(
+                width: 200,
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 100,
+                          child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            controller: stepTextController,
+                            decoration: InputDecoration(hintText: "Steps"),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Required';
+                              }
+                              if (num.tryParse(value) == null) {
+                                return 'Must be number';
+                              }
+                              return null;
+                            },
+                          ),
+                        )
+                      ],
+                    )
+                  )
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await stepController.addSteps(stepTextController.text, selectedDate);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Successfully added steps'), backgroundColor: Colors.green,),
                       );
                       reload();
                       Navigator.pop(context);
@@ -271,35 +352,37 @@ class _HomePageState extends State<HomePage> {
 
   Widget calorieSummary(List meals) {
     int calsFromFood = calculateCaloriesFromFood();
-    int calsFromExercise = 0;
+    // Active walking calories can very loosely be calculated as 0.04 * number of steps
+    int calsFromExercise = isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
     String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(
       height: 140,
       padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
-          color: Color(0xFFEEEEEE),
-          child: Padding(padding: EdgeInsets.all(5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Calories", style: TextStyle(fontSize: 26)),
-                Padding(
-                  padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                    child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(children: [Text(calsFromFood.toString(), style: tfstyle.homeCardTitleTextStyle), Text("Food")]),
-                      Column(children: [Text(calsFromExercise.toString(), style: tfstyle.homeCardTitleTextStyle), Text("Exercise")]),
-                      Column(children: [Text(netCals, style: tfstyle.homeCardTitleTextStyle) ,Text("Net")]),
-                    ],
+      child: Card(
+        elevation: 10,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SizedBox.expand(
+            child: Padding(padding: EdgeInsets.all(5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Calories", style: TextStyle(fontSize: 26)),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                      child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(children: [Text(calsFromFood.toString(), style: homeCardTitleTextStyle), Text("Food")]),
+                        Column(children: [Text(calsFromExercise.toString(), style: homeCardTitleTextStyle), Text("Exercise")]),
+                        Column(children: [Text(netCals, style: homeCardTitleTextStyle) ,Text("Net")]),
+                      ],
+                    )
                   )
-                )
-              ],
+                ],
+              )
             )
-          )
-        )
+        ),
       )
     );
   }
@@ -312,9 +395,9 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.only(top: 5, bottom: 5),
         child: Row(
           children: [
-            Text(item["name"], style: tfstyle.cardBodyTextStyle),
+            Text(item["name"], style: cardBodyTextStyle),
             Spacer(),
-            Text(item["calories"].toString() + " cals", style: tfstyle.cardBodyTextStyle),
+            Text(item["calories"].toString() + " cals", style: cardBodyTextStyle),
           ],
         )
         )
@@ -324,24 +407,22 @@ class _HomePageState extends State<HomePage> {
       // This manages to maintain proper heights without using expanded
       height: 140 + (items.length - 2)*26,
       padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
-          color: Color(0xFFEEEEEE),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5)
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(meal["type"] as String, style: tfstyle.homeCardTitleTextStyle),
-                SizedBox(height: 10),
-                Column(children: items)
-              ],
+      child: Card(
+        elevation: 10,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SizedBox.expand(
+            child: Padding(
+              padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(meal["type"] as String, style: homeCardTitleTextStyle),
+                  SizedBox(height: 10),
+                  Column(children: items)
+                ],
+              )
             )
-          )
-        )
+        ),
       )
     );
   }
@@ -384,8 +465,9 @@ class _HomePageState extends State<HomePage> {
   loadJson() async {
     isLoading = true;
     //await Future.delayed(Duration(seconds: 1)); // Uncomment to verify loading states working
-    var file = FileReadWrite("data.json");
-    String data = await file.read();
+    var mealFile = FileReadWrite("mealdata-${selectedDate}.json");
+    String data = await mealFile.read();
+    await stepController.loadSteps();
     dynamic jsonResult;
     try { jsonResult = json.decode(data); } on Exception catch (_) {
       jsonResult = [];
@@ -396,10 +478,6 @@ class _HomePageState extends State<HomePage> {
       selectedMealData = mealData.where((i) => DateTime.parse(i["date"]) == selectedDate).toList();
       isLoading = false;
     });
-  }
-
-  simpleDate(DateTime date) {
-    return new DateTime(date.year, date.month, date.day);
   }
 
   incrementSelectedDate(int addsub) {
@@ -420,13 +498,13 @@ class _HomePageState extends State<HomePage> {
   selectedDateLabel() {
     Text label;
     if (selectedDate == simpleDate(DateTime.now())) {
-      label = Text("Today", style: tfstyle.homeCardTitleTextStyle);
+      label = Text("Today", style: homeCardTitleTextStyle);
     }
     else if (selectedDate == simpleDate(DateTime.now().subtract(Duration(days: 1)))) {
-      label = Text("Yesterday", style: tfstyle.homeCardTitleTextStyle);
+      label = Text("Yesterday", style: homeCardTitleTextStyle);
     }
     else {
-      label = Text("${DateFormat.MMMM().format(selectedDate)} ${selectedDate.day}", style: tfstyle.homeCardTitleTextStyle);
+      label = Text("${DateFormat.MMMM().format(selectedDate)} ${selectedDate.day}", style: homeCardTitleTextStyle);
     }
     return (Container(width: 200, child: Center(child: label)));
   }
