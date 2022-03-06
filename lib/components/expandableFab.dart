@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:trifit/assets/Styles.dart';
 
 /*
 Modified version of the component from https://medium.com/@sabikrahat/want-to-set-an-expandable-floating-button-in-your-flutter-project-3cedfd511a2d
@@ -127,6 +128,7 @@ Widget _buildTapToOpenFab() {
           curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
           duration: const Duration(milliseconds: 250),
           child: FloatingActionButton(
+            backgroundColor: trifitColor[900],
             onPressed: _toggle,
             child: const Icon(Icons.add),
           ),
@@ -190,7 +192,7 @@ final VoidCallback? onPressed;
     return Material(
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
-      color: theme.accentColor,
+      color: trifitColor[900],
       elevation: 4.0,
       child: IconTheme.merge(
         data: theme.accentIconTheme,
