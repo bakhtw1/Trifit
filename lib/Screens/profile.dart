@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../assets/Styles.dart' as tfstyle;
+import '../assets/Styles.dart';
 import '../data/profile.dart';
 import '../components/friendList.dart';
 
@@ -177,7 +177,7 @@ class _ProfileState extends State<Profile> {
           bottom: 10,
           right: 10,
           child: FloatingActionButton(
-            backgroundColor: tfstyle.trifitColor[700],
+            backgroundColor: trifitColor[700],
             onPressed: () async {
               final profile = await Navigator.push(
                 context,
