@@ -359,29 +359,30 @@ class _HomePageState extends State<HomePage> {
     return Container(
       height: 140,
       padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
-          color: Color(0xFFEEEEEE),
-          child: Padding(padding: EdgeInsets.all(5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Calories", style: TextStyle(fontSize: 26)),
-                Padding(
-                  padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
-                    child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(children: [Text(calsFromFood.toString(), style: homeCardTitleTextStyle), Text("Food")]),
-                      Column(children: [Text(calsFromExercise.toString(), style: homeCardTitleTextStyle), Text("Exercise")]),
-                      Column(children: [Text(netCals, style: homeCardTitleTextStyle) ,Text("Net")]),
-                    ],
+      child: Card(
+        elevation: 10,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SizedBox.expand(
+            child: Padding(padding: EdgeInsets.all(5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text("Calories", style: TextStyle(fontSize: 26)),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20, right: 20, bottom: 10),
+                      child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(children: [Text(calsFromFood.toString(), style: homeCardTitleTextStyle), Text("Food")]),
+                        Column(children: [Text(calsFromExercise.toString(), style: homeCardTitleTextStyle), Text("Exercise")]),
+                        Column(children: [Text(netCals, style: homeCardTitleTextStyle) ,Text("Net")]),
+                      ],
+                    )
                   )
-                )
-              ],
+                ],
+              )
             )
-          )
-        )
+        ),
       )
     );
   }
@@ -406,24 +407,22 @@ class _HomePageState extends State<HomePage> {
       // This manages to maintain proper heights without using expanded
       height: 140 + (items.length - 2)*26,
       padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-      child: SizedBox.expand(
-        child: Card (
-          color: Color(0xFFEEEEEE),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5)
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(meal["type"] as String, style: homeCardTitleTextStyle),
-                SizedBox(height: 10),
-                Column(children: items)
-              ],
+      child: Card(
+        elevation: 10,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SizedBox.expand(
+            child: Padding(
+              padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(meal["type"] as String, style: homeCardTitleTextStyle),
+                  SizedBox(height: 10),
+                  Column(children: items)
+                ],
+              )
             )
-          )
-        )
+        ),
       )
     );
   }
