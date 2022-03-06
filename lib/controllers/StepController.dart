@@ -9,7 +9,6 @@ class StepController {
 
   // Fetches step data for the current day and days-1 previous days
   getStepsForPastDays(int days) {
-    print(allSteps);
     var filteredSteps = [];
     for (int i = 0; i <= days; i++) {
       filteredSteps.addAll(_getStepsForDay(simpleDate(DateTime.now()).subtract(Duration(days: i))));
@@ -55,7 +54,6 @@ class StepController {
     }
     allSteps = jsonResult;
 
-    print(allSteps);
     for (var step in allSteps) {
       if (step["date"] == date.toString()) {
         step["steps"] = (int.parse(step["steps"])+int.parse(toAdd)).toString();
