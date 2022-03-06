@@ -20,54 +20,51 @@ class _LineChartCardState extends State<LineChartCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 10,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: EdgeInsets.only(top: 12),
-        child: Stack(
-          children: <Widget>[
-            Column (
-              children: [
+        elevation: 10,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: EdgeInsets.only(top: 12),
+          child: Stack(
+            children: <Widget>[
+              Column(children: [
                 Text("Test", style: homeCardTitleTextStyle),
                 AspectRatio(
                   aspectRatio: 1.70,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          right: 18.0, left: 12.0, top: 12, bottom: 12),
-                      child: LineChart(
-                        showAvg ? avgData() : mainData(),
-                      ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        right: 18.0, left: 12.0, top: 12, bottom: 12),
+                    child: LineChart(
+                      showAvg ? avgData() : mainData(),
                     ),
                   ),
-              ]
-            ),
-            // SizedBox(
-            //   width: 60,
-            //   height: 34,
-            //   child: TextButton(
-            //     onPressed: () {
-            //       setState(() {
-            //         showAvg = !showAvg;
-            //       });
-            //     },
-            //     child: Text(
-            //       'avg',
-            //       style: TextStyle(
-            //           fontSize: 12,
-            //           color:
-            //               showAvg ? Colors.black.withOpacity(0.5) : Colors.black),
-            //     ),
-            //   ),
-            // ),
-          ],
-        ),
-      )
-    );
+                ),
+              ]),
+              SizedBox(
+                width: 60,
+                height: 34,
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      showAvg = !showAvg;
+                    });
+                  },
+                  child: Text(
+                    'avg',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: showAvg
+                            ? Colors.black.withOpacity(0.5)
+                            : Colors.black),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 
   LineChartData mainData() {
     return LineChartData(
-
       gridData: FlGridData(
         show: true,
         drawVerticalLine: true,
