@@ -127,6 +127,7 @@ Widget _buildTapToOpenFab() {
           curve: const Interval(0.25, 1.0, curve: Curves.easeInOut),
           duration: const Duration(milliseconds: 250),
           child: FloatingActionButton(
+            backgroundColor: Color.fromRGBO(169, 92, 200, 1),
             onPressed: _toggle,
             child: const Icon(Icons.add),
           ),
@@ -190,7 +191,7 @@ final VoidCallback? onPressed;
     return Material(
       shape: const CircleBorder(),
       clipBehavior: Clip.antiAlias,
-      color: theme.accentColor,
+      color: Color.fromRGBO(169, 92, 200, 1),
       elevation: 4.0,
       child: IconTheme.merge(
         data: theme.accentIconTheme,
