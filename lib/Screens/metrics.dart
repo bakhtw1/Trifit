@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:trifit/components/BarChart.dart';
+import 'package:trifit/components/DoubleBarChart.dart';
+import 'package:trifit/components/SampleDoubleBarChart.dart';
+import 'package:trifit/components/WeightChart.dart';
 
 import '../components/LineChart.dart';
 
@@ -21,7 +24,12 @@ class _MetricsState extends State<Metrics> {
           //   height: 20,
           // ),
           // LineChartCard(),
-          BarChartSample1()
+          WeeklyDataBarChart(
+            title: "Daily Steps",
+            yExtents: 10000,
+          ),
+          DoubleBarChartWeeklyData(title: "Calories", yExtents: 5000),
+          WeightMetrics(title: "Weight")
         ],
       ),
     );

@@ -37,6 +37,7 @@ dependencies:
   intl: ^0.17.0
   path_provider: ^2.0.9
   fl_chart: ^0.45.1
+  syncfusion_flutter_datepicker: ^19.4.54
 
 dev_dependencies:
   flutter_test:

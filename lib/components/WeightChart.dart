@@ -6,7 +6,7 @@ import 'package:trifit/utilities/ColorExtentions.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:trifit/utilities/DateUtil.dart';
 
-class WeeklyDataBarChart extends StatefulWidget {
+class WeightMetrics extends StatefulWidget {
   final List<Color> availableColors = const [
     Colors.purpleAccent,
     Colors.yellow,
@@ -17,17 +17,14 @@ class WeeklyDataBarChart extends StatefulWidget {
   ];
 
   final String title;
-  final double yExtents;
 
-  const WeeklyDataBarChart(
-      {Key? key, required this.title, required this.yExtents})
-      : super(key: key);
+  const WeightMetrics({Key? key, required this.title}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => WeeklyDataBarChartState();
+  State<StatefulWidget> createState() => WeightMetricsState();
 }
 
-class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
+class WeightMetricsState extends State<WeightMetrics> {
   final Color barBackgroundColor = const Color(0xffd7a1f9);
   final Color cardBackgroundColor = Colors.white;
   static const Color cardTitleTextColor = Colors.purple;
@@ -39,79 +36,97 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
   static const Color tooltipChildTextColor = Colors.white;
   static const Color barLabelTextColor = Colors.black;
 
-  double barYExtent = 10000;
+  double barYExtent = 250;
 
   List<double> weekData = [
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
-    0,
+    200,
+    190,
+    195,
+    190,
+    187,
+    185,
+    180,
+    182,
+    177,
+    175,
+    180,
+    175
   ];
 
   DateUtil dateUtil = DateUtil();
 
-  List<String> daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday"
+  String year = "";
+  List<String> months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
   ];
-
-  List<String> daysOfWeekLabels = ["S", "M", "T", "W", "T", "F", "S"];
-
-  String dateRange = "";
+  List<String> monthLabels = [
+    "J",
+    "F",
+    "M",
+    "A",
+    "M",
+    "J",
+    "J",
+    "A",
+    "S",
+    "O",
+    "N",
+    "D"
+  ];
 
   final Duration animDuration = const Duration(milliseconds: 250);
   int touchedIndex = -1;
 
-  void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
+  void _onSelectionChanged() {
     setState(() {
-      dateRange = dateUtil.getWeekRange(args.value);
-      for (int i = 0; i < weekData.length; i++) {
-        weekData[i] = Random().nextInt(widget.yExtents.toInt()).toDouble() + 6;
-      }
       refreshState();
     });
   }
 
   Widget DatePicker() {
-    return Container(
-      // width: 250,
-      // height: 450,
-      child: SfDateRangePicker(
-          onSelectionChanged: _onSelectionChanged,
-          monthViewSettings: const DateRangePickerMonthViewSettings(
-              showTrailingAndLeadingDates: true),
-          allowViewNavigation: true,
-          view: DateRangePickerView.month,
-          maxDate: dateUtil.getCurrentSaturday(),
-          selectionMode: DateRangePickerSelectionMode.single,
-          selectableDayPredicate: (DateTime dateTime) {
-            if (dateTime.weekday == 7) {
-              return true;
+    List<Widget> items = [];
+
+    int currentYear = DateTime.now().year;
+    for (int i = currentYear; i > 2000; i--) {
+      items.add(ListTile(
+        onTap: () {
+          setState(() {
+            for (int i = 0; i < weekData.length; i++) {
+              weekData[i] = Random().nextInt(10).toDouble() + 170;
             }
-            return false;
-          },
-          initialSelectedRange: PickerDateRange(
-            dateUtil.getCurrentSunday(),
-            dateUtil.getCurrentSaturday(),
-          )),
+            year = i.toString();
+            refreshState();
+            Navigator.of(context).pop();
+          });
+        },
+        title: Text(
+          i.toString(),
+          textAlign: TextAlign.center,
+        ),
+      ));
+    }
+    return Container(
+      width: 250,
+      height: 100,
+      child: ListView(children: items),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (dateRange == "") {
-      dateRange = dateUtil.getWeekRange(DateTime.now());
-      for (int i = 0; i < weekData.length; i++) {
-        weekData[i] = Random().nextDouble() * widget.yExtents;
-      }
+    if (year == "") {
+      year = DateTime.now().year.toString();
     }
 
     return AspectRatio(
@@ -140,7 +155,7 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
                     height: 4,
                   ),
                   Text(
-                    dateRange,
+                    year,
                     style: TextStyle(
                         color: cardSubtitleTextColor,
                         fontSize: 18,
@@ -169,9 +184,9 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
               child: Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.calendar_month,
-                    color: const Color(0xff0f4a3c),
+                    color: Color(0xff0f4a3c),
                   ),
                   onPressed: () {
                     setState(() {
@@ -180,24 +195,24 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
                           builder: (context) {
                             return StatefulBuilder(
                                 builder: ((context, setState) {
-                              return Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Text(
-                                      "Select Week",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: cardTitleTextColor,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
+                              return Container(
+                                height: 200,
+                                child: Column(
+                                  children: [
+                                    const Padding(
+                                      padding: EdgeInsets.all(15.0),
+                                      child: Text(
+                                        "Select Year",
+                                        style: TextStyle(
+                                            color: cardTitleTextColor,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                      ),
                                     ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: DatePicker(),
-                                  )
-                                ],
+                                    DatePicker()
+                                  ],
+                                ),
                               );
                             }));
                           });
@@ -234,7 +249,7 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
               : const BorderSide(color: Colors.white, width: 0),
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
-            y: widget.yExtents,
+            y: barYExtent,
             colors: [barBackgroundColor],
           ),
         ),
@@ -243,7 +258,7 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
     );
   }
 
-  List<BarChartGroupData> showingGroups() => List.generate(7, (i) {
+  List<BarChartGroupData> showingGroups() => List.generate(12, (i) {
         return makeGroupData(i, weekData[i], isTouched: i == touchedIndex);
       });
 
@@ -254,7 +269,7 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
             tooltipBgColor: tooltipBgColor,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               String weekDay;
-              weekDay = daysOfWeek[group.x.toInt()];
+              weekDay = months[group.x.toInt()];
               return BarTooltipItem(
                 weekDay + '\n',
                 const TextStyle(
@@ -298,7 +313,7 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
               fontSize: 14),
           margin: 16,
           getTitles: (double value) {
-            return daysOfWeekLabels[value.toInt()];
+            return monthLabels[value.toInt()];
           },
         ),
         leftTitles: SideTitles(

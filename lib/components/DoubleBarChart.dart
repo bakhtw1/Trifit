@@ -6,7 +6,7 @@ import 'package:trifit/utilities/ColorExtentions.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:trifit/utilities/DateUtil.dart';
 
-class WeeklyDataBarChart extends StatefulWidget {
+class DoubleBarChartWeeklyData extends StatefulWidget {
   final List<Color> availableColors = const [
     Colors.purpleAccent,
     Colors.yellow,
@@ -19,15 +19,17 @@ class WeeklyDataBarChart extends StatefulWidget {
   final String title;
   final double yExtents;
 
-  const WeeklyDataBarChart(
+  const DoubleBarChartWeeklyData(
       {Key? key, required this.title, required this.yExtents})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => WeeklyDataBarChartState();
+  State<StatefulWidget> createState() => DoubleBarChartWeeklyDataState();
 }
 
-class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
+class DoubleBarChartWeeklyDataState extends State<DoubleBarChartWeeklyData> {
+  final Color leftBarColor = Colors.purple;
+  final Color rightBarColor = Colors.black;
   final Color barBackgroundColor = const Color(0xffd7a1f9);
   final Color cardBackgroundColor = Colors.white;
   static const Color cardTitleTextColor = Colors.purple;
@@ -41,7 +43,17 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
 
   double barYExtent = 10000;
 
-  List<double> weekData = [
+  List<double> weekData1 = [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+  ];
+
+  List<double> weekData2 = [
     0,
     0,
     0,
@@ -73,8 +85,9 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       dateRange = dateUtil.getWeekRange(args.value);
-      for (int i = 0; i < weekData.length; i++) {
-        weekData[i] = Random().nextInt(widget.yExtents.toInt()).toDouble() + 6;
+      for (int i = 0; i < weekData1.length; i++) {
+        weekData1[i] = Random().nextInt(widget.yExtents.toInt()).toDouble() + 6;
+        weekData2[i] = Random().nextInt(widget.yExtents.toInt()).toDouble() + 6;
       }
       refreshState();
     });
@@ -109,8 +122,9 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
   Widget build(BuildContext context) {
     if (dateRange == "") {
       dateRange = dateUtil.getWeekRange(DateTime.now());
-      for (int i = 0; i < weekData.length; i++) {
-        weekData[i] = Random().nextDouble() * widget.yExtents;
+      for (int i = 0; i < weekData1.length; i++) {
+        weekData1[i] = Random().nextDouble() * widget.yExtents;
+        weekData2[i] = Random().nextDouble() * widget.yExtents;
       }
     }
 
@@ -161,6 +175,42 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
                   const SizedBox(
                     height: 12,
                   ),
+                  Card(
+                    elevation: 5,
+                    child: Container(
+                        child: Column(
+                      children: [
+                        Row(children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                  color: leftBarColor, shape: BoxShape.circle),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(0),
+                            child: Text("Calorie Intake"),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                  color: rightBarColor, shape: BoxShape.circle),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(0),
+                            child: Text("Calories Exerted"),
+                          )
+                        ]),
+                      ],
+                    )),
+                  ),
                 ],
               ),
             ),
@@ -169,9 +219,9 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
               child: Align(
                 alignment: Alignment.topRight,
                 child: IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.calendar_month,
-                    color: const Color(0xff0f4a3c),
+                    color: Color(0xff0f4a3c),
                   ),
                   onPressed: () {
                     setState(() {
@@ -182,8 +232,8 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
                                 builder: ((context, setState) {
                               return Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(15.0),
+                                  const Padding(
+                                    padding: EdgeInsets.all(15.0),
                                     child: Text(
                                       "Select Week",
                                       textAlign: TextAlign.center,
@@ -216,35 +266,40 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
 
   BarChartGroupData makeGroupData(
     int x,
-    double y, {
+    double y1,
+    double y2, {
     bool isTouched = false,
     Color barColor = barColor,
-    double width = 22,
+    double width = 10,
     List<int> showTooltips = const [],
   }) {
     return BarChartGroupData(
       x: x,
+      barsSpace: 4,
       barRods: [
         BarChartRodData(
-          y: isTouched ? y + 1 : y,
-          colors: isTouched ? [touchedBarColor] : [barColor],
+          y: isTouched ? y1 + 1 : y1,
+          colors: isTouched ? [touchedBarColor] : [leftBarColor],
           width: width,
           borderSide: isTouched
               ? BorderSide(color: touchedBarColor.darken(), width: 1)
               : const BorderSide(color: Colors.white, width: 0),
-          backDrawRodData: BackgroundBarChartRodData(
-            show: true,
-            y: widget.yExtents,
-            colors: [barBackgroundColor],
-          ),
         ),
+        BarChartRodData(
+            y: isTouched ? y2 + 1 : y2,
+            colors: isTouched ? [touchedBarColor] : [rightBarColor],
+            width: width,
+            borderSide: isTouched
+                ? BorderSide(color: touchedBarColor.darken(), width: 1)
+                : const BorderSide(color: Colors.white, width: 0))
       ],
       showingTooltipIndicators: showTooltips,
     );
   }
 
   List<BarChartGroupData> showingGroups() => List.generate(7, (i) {
-        return makeGroupData(i, weekData[i], isTouched: i == touchedIndex);
+        return makeGroupData(i, weekData1[i], weekData2[i],
+            isTouched: i == touchedIndex);
       });
 
   BarChartData mainBarData() {
