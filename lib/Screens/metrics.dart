@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trifit/components/BarChart.dart';
 import 'package:trifit/components/DoubleBarChart.dart';
-import 'package:trifit/components/SampleDoubleBarChart.dart';
 import 'package:trifit/components/WeightChart.dart';
-
-import '../components/LineChart.dart';
 
 class Metrics extends StatefulWidget {
   const Metrics({Key? key}) : super(key: key);
@@ -18,12 +15,7 @@ class _MetricsState extends State<Metrics> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView(
-        children: <Widget>[
-          // LineChartCard(),
-          // SizedBox(
-          //   height: 20,
-          // ),
-          // LineChartCard(),
+        children: const <Widget>[
           WeeklyDataBarChart(
             title: "Daily Steps",
             yExtents: 10000,

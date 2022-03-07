@@ -95,8 +95,6 @@ class DoubleBarChartWeeklyDataState extends State<DoubleBarChartWeeklyData> {
 
   Widget DatePicker() {
     return Container(
-      // width: 250,
-      // height: 450,
       child: SfDateRangePicker(
           onSelectionChanged: _onSelectionChanged,
           monthViewSettings: const DateRangePickerMonthViewSettings(
@@ -190,8 +188,8 @@ class DoubleBarChartWeeklyDataState extends State<DoubleBarChartWeeklyData> {
                                   color: leftBarColor, shape: BoxShape.circle),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(0),
+                          const Padding(
+                            padding: EdgeInsets.all(0),
                             child: Text("Calorie Intake"),
                           ),
                           Padding(
@@ -203,8 +201,8 @@ class DoubleBarChartWeeklyDataState extends State<DoubleBarChartWeeklyData> {
                                   color: rightBarColor, shape: BoxShape.circle),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(0),
+                          const Padding(
+                            padding: EdgeInsets.all(0),
                             child: Text("Calories Exerted"),
                           )
                         ]),

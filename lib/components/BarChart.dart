@@ -82,8 +82,6 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
 
   Widget DatePicker() {
     return Container(
-      // width: 250,
-      // height: 450,
       child: SfDateRangePicker(
           onSelectionChanged: _onSelectionChanged,
           monthViewSettings: const DateRangePickerMonthViewSettings(
@@ -201,8 +199,6 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
                               );
                             }));
                           });
-
-                      // refreshState();
                     });
                   },
                 ),
