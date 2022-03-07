@@ -216,8 +216,6 @@ class WeightMetricsState extends State<WeightMetrics> {
                               );
                             }));
                           });
-
-                      // refreshState();
                     });
                   },
                 ),

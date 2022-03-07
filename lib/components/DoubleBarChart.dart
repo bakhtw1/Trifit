@@ -249,8 +249,6 @@ class DoubleBarChartWeeklyDataState extends State<DoubleBarChartWeeklyData> {
                               );
                             }));
                           });
-
-                      // refreshState();
                     });
                   },
                 ),
