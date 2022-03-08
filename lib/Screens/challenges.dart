@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../assets/Styles.dart';
 
 class Challenges extends StatefulWidget {
   const Challenges({Key? key}) : super(key: key);
@@ -11,13 +12,25 @@ class _ChallengesState extends State<Challenges> {
   
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(widget.pageTitle),
-          ],
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          bottom: 10,
+          right: 10,
+          child: FloatingActionButton(
+            backgroundColor: trifitColor[700],
+            onPressed: () {},
+            tooltip: 'Add challenge',
+            child: const Icon(Icons.add),
+          ),
         ),
-      );
+      ],
+    );
   }
+
+  Container challengeCard(challengeText) => Container(
+    child: Card(
+      child: Text(challengeText),
+    ),
+  );
 }
