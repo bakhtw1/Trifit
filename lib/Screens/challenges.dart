@@ -9,18 +9,36 @@ class Challenges extends StatefulWidget {
 }
 
 class _ChallengesState extends State<Challenges> {
-  
+  //To be moved to data
+  List challenges = [];
+
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: <Widget>[
+      children: [
+        Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
+          margin: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              for (var i in challenges) challengeCard("Walk 100 miles")
+            ],
+          ),
+        ),
         Positioned(
           bottom: 10,
           right: 10,
           child: FloatingActionButton(
             backgroundColor: trifitColor[700],
-            onPressed: () {},
-            tooltip: 'Add challenge',
+            onPressed: () {
+              setState(() {
+                challenges.add({"challengeText": "Run 100 miles"});
+              });
+            },
+            tooltip: 'Edit',
             child: const Icon(Icons.add),
           ),
         ),
@@ -28,9 +46,37 @@ class _ChallengesState extends State<Challenges> {
     );
   }
 
-  Container challengeCard(challengeText) => Container(
+  Container challengeCard(String challText) => Container(
     child: Card(
-      child: Text(challengeText),
+      elevation: 10,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(5),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Icon(
+                    Icons.run_circle
+                  ),
+                  Text(
+                    challText,
+                    style: TextStyle(fontSize: 15)
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
     ),
   );
 }
