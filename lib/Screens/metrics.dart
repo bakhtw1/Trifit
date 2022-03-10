@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:trifit/components/BarChart.dart';
+import 'package:trifit/components/DoubleBarChart.dart';
+import 'package:trifit/components/WeightChart.dart';
 
 class Metrics extends StatefulWidget {
   const Metrics({Key? key}) : super(key: key);
@@ -8,16 +11,19 @@ class Metrics extends StatefulWidget {
 }
 
 class _MetricsState extends State<Metrics> {
-
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(widget.pageTitle),
-          ],
-        ),
-      );
+    return Scaffold(
+      body: ListView(
+        children: const <Widget>[
+          WeeklyDataBarChart(
+            title: "Daily Steps",
+            yExtents: 10000,
+          ),
+          DoubleBarChartWeeklyData(title: "Calories", yExtents: 5000),
+          WeightMetrics(title: "Weight")
+        ],
+      ),
+    );
   }
 }
