@@ -39,13 +39,10 @@ class _ChallengesState extends State<Challenges> {
           right: 10,
           child: FloatingActionButton(
             backgroundColor: trifitColor[700],
-            onPressed: () {
-              setState(() {
-
+            onPressed: () async {
                 showMealEntryDialog(() => {
                   setState(() {})
                 });
-              });
             },
             tooltip: 'Edit',
             child: const Icon(Icons.add),
@@ -66,7 +63,7 @@ class _ChallengesState extends State<Challenges> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Enter a meal'),
+              title: Text('New challenge'),
               content: Container(
                 width: MediaQuery.of(context).size.width*0.8,
                 child: SingleChildScrollView(
@@ -126,6 +123,7 @@ class _ChallengesState extends State<Challenges> {
                       "challengeType": challengeTypeDropdownValue,
                       "challengeProgress": Random().nextInt(100)/100,
                     });
+                    reload();
                     Navigator.pop(context);
                   },
                   child: Text('Add'),
