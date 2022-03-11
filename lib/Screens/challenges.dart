@@ -55,8 +55,8 @@ class _ChallengesState extends State<Challenges> {
   void showMealEntryDialog(reload) {
     final _formKey = GlobalKey<FormState>();
     String challengeTypeDropdownValue = "";
-
     TextEditingController distanceTextController = TextEditingController();
+  
     showDialog(
       context: context,
       builder: (context) {
@@ -71,7 +71,6 @@ class _ChallengesState extends State<Challenges> {
                     key: _formKey,
                     child: Column(
                       children: [
-
                         Align(
                           alignment: Alignment.topLeft, 
                           child: Row(
@@ -86,8 +85,7 @@ class _ChallengesState extends State<Challenges> {
                               ),
                             ],
                           )
-                        ),
-                        
+                        ), 
                         Container(
                           child: TextFormField(
                             keyboardType: TextInputType.number,
@@ -104,8 +102,6 @@ class _ChallengesState extends State<Challenges> {
                             },
                           ),
                         )
-                        
-                        
                       ],
                     ),
                   ),
@@ -118,13 +114,15 @@ class _ChallengesState extends State<Challenges> {
                 ),
                 TextButton(
                   onPressed: () {
-                    challenges.add({
-                      "challengeText": challengeTypeDropdownValue+" "+distanceTextController.text+" km",
-                      "challengeType": challengeTypeDropdownValue,
-                      "challengeProgress": Random().nextInt(100)/100,
-                    });
-                    reload();
-                    Navigator.pop(context);
+                    if (_formKey.currentState!.validate()) {
+                      challenges.add({
+                        "challengeText": challengeTypeDropdownValue+" "+distanceTextController.text+" km",
+                        "challengeType": challengeTypeDropdownValue,
+                        "challengeProgress": Random().nextInt(100)/100,
+                      });
+                      reload();
+                      Navigator.pop(context);
+                    }
                   },
                   child: Text('Add'),
                 ),
@@ -193,16 +191,16 @@ class _ChallengesState extends State<Challenges> {
     child: Padding(
       padding: const EdgeInsets.all(3),
       child: Stack(
-      children: [
-        Positioned(
-          child: Container(
-            color: trifitColor[700],
-            height: 19,
-            width: MediaQuery.of(context).size.width * 0.4 * percent,
+        children: [
+          Positioned(
+            child: Container(
+              color: trifitColor[700],
+              height: 19,
+              width: MediaQuery.of(context).size.width * 0.4 * percent,
+            ),
           ),
-        ),
-      ],
-    ),
+        ],
+      ),
     ),
   );
 }
