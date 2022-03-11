@@ -20,35 +20,33 @@ class _ChallengesState extends State<Challenges> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
-          margin: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              for (var i in challenges) challengeCard(i)
-            ],
+    return Scaffold(
+        body: Stack(
+        children: [
+          Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
+            margin: const EdgeInsets.all(8),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                for (var i in challenges) challengeCard(i)
+              ],
+            ),
           ),
-        ),
-        Positioned(
-          bottom: 10,
-          right: 10,
-          child: FloatingActionButton(
-            backgroundColor: trifitColor[700],
-            onPressed: () async {
-                showMealEntryDialog(() => {
-                  setState(() {})
-                });
-            },
-            tooltip: 'Edit',
-            child: const Icon(Icons.add),
-          ),
-        ),
-      ],
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: trifitColor[700],
+        onPressed: () async {
+            showMealEntryDialog(() => {
+              setState(() {})
+            });
+        },
+        tooltip: 'Edit',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
