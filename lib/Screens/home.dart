@@ -375,7 +375,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget calorieSummary(List meals) {
-    int calsFromFood = mealController.calorieIntakeForDate(selectedDate);
+    int calsFromFood = isLoading ? 0 : mealController.calorieIntakeForDate(selectedDate);
     // Active walking calories can very loosely be calculated as 0.04 * number of steps
     int calsFromExercise =
         isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
