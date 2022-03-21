@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
@@ -375,10 +373,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget calorieSummary(List meals) {
-    int calsFromFood = isLoading ? 0 : mealController.calorieIntakeForDate(selectedDate);
+    int calsFromFood = 
+      isLoading ? 0 : mealController.calorieIntakeForDate(selectedDate);
     // Active walking calories can very loosely be calculated as 0.04 * number of steps
     int calsFromExercise =
-        isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
+      isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
     String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(
