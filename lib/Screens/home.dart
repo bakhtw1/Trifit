@@ -374,18 +374,8 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  int calculateCaloriesFromFood() {
-    int cals = 0;
-    for (var meal in selectedMealData) {
-      for (var item in meal["items"]) {
-        cals += item["calories"] as int;
-      }
-    }
-    return cals;
-  }
-
   Widget calorieSummary(List meals) {
-    int calsFromFood = calculateCaloriesFromFood();
+    int calsFromFood = mealController.calorieIntakeForDate(selectedDate);
     // Active walking calories can very loosely be calculated as 0.04 * number of steps
     int calsFromExercise =
         isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));

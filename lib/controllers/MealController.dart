@@ -48,4 +48,17 @@ class MealController {
     allMeals.add(toAdd);
     writeJson("mealdata-$date.json", jsonEncode(allMeals));
   }
+
+  int calorieIntakeForDate(DateTime date) {
+    var selectedMealData = allMeals
+      .where((i) => DateTime.parse(i["date"]) == date)
+      .toList();
+    int cals = 0;
+    for (var meal in selectedMealData) {
+      for (var item in meal["items"]) {
+        cals += item["calories"] as int;
+      }
+    }
+    return cals;
+  }
 }
