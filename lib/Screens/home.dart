@@ -3,11 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
-import 'package:trifit/models/StepModel.dart';
 import '../assets/Styles.dart';
 import '../components/dropdown.dart';
 import '../components/expandableFab.dart';
-import '../utilities/FileReadWrite.dart';
+import '../controllers/MealController.dart';
 import 'package:intl/intl.dart';
 
 import '../utilities/UtilityFunctions.dart';
@@ -29,8 +28,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  // The meal data and the cards that will display the data
-  List mealData = [];
   List selectedMealData = [];
   List<Widget> mealCards = [];
   List<MealModel> mealModels = [];
@@ -40,6 +37,7 @@ class _HomePageState extends State<HomePage> {
   bool isIncrementDateButtonDisabled = true;
   List steps = [];
   var stepController = StepController();
+  var mealController = MealController();
 
   @override
   Widget build(BuildContext context) {
@@ -238,9 +236,7 @@ class _HomePageState extends State<HomePage> {
                   if (_formKey.currentState!.validate()) {
                     var meal = makeMealModel(mealTypeDropdownValue,
                         itemControllers, calorieControllers);
-                    mealData.add(meal.toJson());
-                    await writeJson(
-                        "mealdata-${selectedDate}.json", jsonEncode(mealData));
+                    await mealController.addMeal(meal, selectedDate);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Successfully added meal'),
@@ -330,9 +326,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   MealModel makeMealModel(
-      String mealType,
-      List<TextEditingController> itemControllers,
-      List<TextEditingController> calorieControllers) {
+    String mealType,
+    List<TextEditingController> itemControllers,
+    List<TextEditingController> calorieControllers) {
     List<Item> items = [];
     for (int i = 0; i < itemControllers.length; i++) {
       items.add(
@@ -504,19 +500,11 @@ class _HomePageState extends State<HomePage> {
   loadJson() async {
     isLoading = true;
     //await Future.delayed(Duration(seconds: 1)); // Uncomment to verify loading states working
-    var mealFile = FileReadWrite("mealdata-${selectedDate}.json");
-    String data = await mealFile.read();
     await stepController.loadSteps();
-    dynamic jsonResult;
-    try {
-      jsonResult = json.decode(data);
-    } on Exception catch (_) {
-      jsonResult = [];
-      isLoading = false;
-    }
+    await mealController.loadMeals(selectedDate);
+
     setState(() {
-      mealData = jsonResult;
-      selectedMealData = mealData
+      selectedMealData = mealController.allMeals
           .where((i) => DateTime.parse(i["date"]) == selectedDate)
           .toList();
       isLoading = false;

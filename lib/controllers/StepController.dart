@@ -44,8 +44,7 @@ class StepController {
   }
 
   addSteps(String toAdd, DateTime date) async {
-    var stepFile = FileReadWrite("steps.json");
-    String stepData = await stepFile.read();
+    String stepData = await file.read();
     bool dateHasSteps = false;
     var jsonResult;
 
