@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../assets/Styles.dart' as tfstyle;
+import '../utilities/Styles.dart' as tfstyle;
 
 class FeedItem extends StatefulWidget {
   final String dp;

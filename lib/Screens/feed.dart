@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trifit/components/addfeeditem.dart';
 import 'package:trifit/components/feedItem.dart';
-import '../assets/Styles.dart' as tfstyle;
+import '../utilities/Styles.dart' as tfstyle;
 import '../utilities/feedData.dart';
 import 'dart:io';
 
