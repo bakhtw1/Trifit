@@ -48,6 +48,8 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 40,
+        automaticallyImplyLeading: false,
+        backgroundColor: trifitColor[900],
         title: Text(_widgetOptionTitles.elementAt(_selectedIndex)),
       ),
       body: Center(

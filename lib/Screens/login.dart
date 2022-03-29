@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:trifit/utilities/Styles.dart';
 import '../firebase/ApplicationState.dart';
+import '../firebase/authentication.dart';
 
 class LoginScreen extends StatelessWidget {
-  LoginScreen({Key? key, required this.appState}) : super(key: key);
-  ApplicationState appState;
+  LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -24,23 +25,20 @@ class LoginScreen extends StatelessWidget {
                   image: AssetImage('assets/images/trifit.png'),
                 ),
                 const SizedBox(height: 30),
-                Container(
-                  width: 150,
-                  child: TextButton(
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(trifitColor[900]),
-                    ),
-                    onPressed: () {
-                      appState.startLoginFlow();
-                    },
-                    child: const Text(
-                      'Login / Sign Up',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                Consumer<ApplicationState>(
+                  builder: (context, appState, _) => Authentication(
+                    appState: appState,
+                    email: appState.email,
+                    loginState: appState.loginState,
+                    startLoginFlow: appState.startLoginFlow,
+                    verifyEmail: appState.verifyEmail,
+                    signInWithEmailAndPassword:
+                        appState.signInWithEmailAndPassword,
+                    cancelRegistration: appState.cancelRegistration,
+                    registerAccount: appState.registerAccount,
+                    signOut: appState.signOut,
                   ),
                 ),
-                const SizedBox(height: 30),
               ],
             ),
           ),
