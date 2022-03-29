@@ -74,12 +74,13 @@ class Authentication extends StatelessWidget {
                 email, (e) => _showErrorDialog(context, 'Invalid email', e)));
       case ApplicationLoginState.password:
         return PasswordForm(
-            email: email!,
-            login: (email, password) {
-              signInWithEmailAndPassword(email, password,
-                  (e) => _showErrorDialog(context, 'Failed to sign in', e));
-            },
-            appState: appState);
+          email: email!,
+          appState: appState,
+          login: (email, password) {
+            signInWithEmailAndPassword(email, password,
+                (e) => _showErrorDialog(context, 'Failed to sign in', e));
+          },
+        );
       case ApplicationLoginState.register:
         return RegisterForm(
           email: email!,
@@ -100,28 +101,22 @@ class Authentication extends StatelessWidget {
           },
         );
       case ApplicationLoginState.loggedIn:
-      // TextButton button = TextButton(
-      //   onPressed: () {
-      //     pushMainScreen(context);
-      //   },
-      //   child: const Text(""),
-      // );
-      // button.onPressed?.call();
-      // return button;
-
-      // return Row(
-      //   children: [
-      //     Padding(
-      //       padding: const EdgeInsets.only(left: 24, bottom: 8),
-      //       child: StyledButton(
-      //         onPressed: () {
-      //           signOut();
-      //         },
-      //         child: const Text('LOGOUT'),
-      //       ),
-      //     ),
-      //   ],
-      // );
+        // TextButton button = TextButton(
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //     Navigator.push(
+        //       context,
+        //       MaterialPageRoute(
+        //         builder: (context) => MainScreen(
+        //           appState: appState,
+        //         ),
+        //       ),
+        //     );
+        //   },
+        //   child: Text(""),
+        // );
+        // button.onPressed?.call();
+        return Text("");
 
       default:
         return Row(
@@ -375,10 +370,11 @@ class _PasswordFormState extends State<PasswordForm> {
     _emailController.text = widget.email;
   }
 
-  void pushMainScreen(context) {
+  void pushMainScreen(context, appState) {
+    Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const MainScreen()),
+      MaterialPageRoute(builder: (context) => MainScreen(appState: appState)),
     );
   }
 
@@ -439,7 +435,7 @@ class _PasswordFormState extends State<PasswordForm> {
                               _passwordController.text,
                             );
                           }
-                          pushMainScreen(context);
+                          pushMainScreen(context, widget.appState);
                         },
                         child: const Text('SIGN IN'),
                       ),
