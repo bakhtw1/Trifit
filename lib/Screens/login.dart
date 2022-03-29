@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:trifit/Screens/home.dart';
 import 'package:trifit/Screens/mainScreen.dart';
@@ -31,6 +32,7 @@ class LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: bgColor,
+        toolbarHeight: 30,
         leading: loginState != LoginState.main
             ? IconButton(
                 onPressed: () {
@@ -41,6 +43,7 @@ class LoginScreenState extends State<LoginScreen> {
                 icon: const Icon(
                   Icons.arrow_back_ios,
                   color: Colors.white,
+                  size: 24
                 ),
               )
             : const Text(""),
@@ -49,63 +52,66 @@ class LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
+            alignment: Alignment.topCenter,
+            padding: const EdgeInsets.only(left: 8, right: 8),
             margin: const EdgeInsets.all(8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Image.asset('assets/images/trifit.png'),
-                const SizedBox(height: 50),
-                if (loginState == LoginState.main)
-                  Column(
-                    children: [
-                      Container(
-                        width: 150,
-                        child: TextButton(
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(trifitColor[900]),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              loginState = LoginState.signin;
-                            });
-                          },
-                          child: const Text(
-                            'SIGN IN',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      Container(
-                        width: 150,
-                        child: TextButton(
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(trifitColor[900]),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              loginState = LoginState.signup;
-                            });
-                          },
-                          child: const Text(
-                            'SIGN UP',
-                            style: TextStyle(color: Colors.white),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(top: 40),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/trifit.png'),
+                  const SizedBox(height: 50),
+                  if (loginState == LoginState.main)
+                    Column(
+                      children: [
+                        Container(
+                          width: 150,
+                          child: TextButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(trifitColor[900]),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                loginState = LoginState.signin;
+                              });
+                            },
+                            child: const Text(
+                              'SIGN IN',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  )
-                else if (loginState == LoginState.signin)
-                  const LoginForm()
-                else if (loginState == LoginState.signup)
-                  const SignupForm()
-                // const LoginForm()
-              ],
+                        const SizedBox(height: 30),
+                        Container(
+                          width: 150,
+                          child: TextButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(trifitColor[900]),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                loginState = LoginState.signup;
+                              });
+                            },
+                            child: const Text(
+                              'SIGN UP',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else if (loginState == LoginState.signin)
+                    const LoginForm()
+                  else if (loginState == LoginState.signup)
+                    const SignupForm()
+                  // const LoginForm()
+                ],
+              ),
             ),
           ),
         ],
@@ -153,6 +159,7 @@ class LoginFormState extends State<LoginForm> {
                 ),
             style: const TextStyle(color: Colors.white),
             controller: emailController,
+            keyboardType: TextInputType.emailAddress,
             // The validator receives the text that the user has entered.
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -288,6 +295,7 @@ class SignupFormState extends State<SignupForm> {
                 ),
             style: const TextStyle(color: Colors.white),
             controller: emailController,
+            keyboardType: TextInputType.emailAddress,
             // The validator receives the text that the user has entered.
             validator: (value) {
               if (value == null || value.isEmpty) {
