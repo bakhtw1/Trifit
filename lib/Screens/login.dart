@@ -147,83 +147,86 @@ class LoginFormState extends State<LoginForm> {
     // Build a Form widget using the _formKey created above.
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            decoration: InputDecoration(
-                hintText: "Email",
-                hintStyle: const TextStyle(color: Colors.white),
-                filled: true,
-                fillColor: loginFormColor,
-                ),
-            style: const TextStyle(color: Colors.white),
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
-            // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Invalid email';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 15),
-          TextFormField(
-            controller: passwordController,
-            obscureText: true,
-            decoration: InputDecoration(
-                hintText: "Password",
-                hintStyle: const TextStyle(color: Colors.white),
-                filled: true,
-                fillColor: loginFormColor,
-                ),
-            style: const TextStyle(color: Colors.white),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Required';
-              }
-              return null;
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  // Validate returns true if the form is valid, or false otherwise.
-                  if (_formKey.currentState!.validate()) {
-                    try {
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(
-                          email: emailController.text,
-                          password: passwordController.text);
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainScreen(),
-                        ),
-                      );
-                    } on FirebaseAuthException catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Container(
-                            height: 20,
-                            child: Center(
-                              child: Text("Failed to sign in: " + authErrorToString(e)),
-                            ),
+      child: Padding(
+        padding: EdgeInsets.only(left: 30, right: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              decoration: InputDecoration(
+                  hintText: "Email",
+                  hintStyle: const TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: loginFormColor,
+                  ),
+              style: const TextStyle(color: Colors.white),
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              // The validator receives the text that the user has entered.
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Invalid email';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 15),
+            TextFormField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                  hintText: "Password",
+                  hintStyle: const TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: loginFormColor,
+                  ),
+              style: const TextStyle(color: Colors.white),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Required';
+                }
+                return null;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Validate returns true if the form is valid, or false otherwise.
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: emailController.text,
+                            password: passwordController.text);
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MainScreen(),
                           ),
-                          backgroundColor: trifitColor[900],
-                        ),
-                      );
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Container(
+                              height: 20,
+                              child: Center(
+                                child: Text("Failed to sign in: " + authErrorToString(e)),
+                              ),
+                            ),
+                            backgroundColor: trifitColor[900],
+                          ),
+                        );
+                      }
                     }
-                  }
-                },
-                child: const Text('LOG IN'),
+                  },
+                  child: const Text('LOG IN'),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -265,102 +268,105 @@ class SignupFormState extends State<SignupForm> {
     // Build a Form widget using the _formKey created above.
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextFormField(
-            decoration: InputDecoration(
-                hintText: "Name",
-                hintStyle: const TextStyle(color: Colors.white),
-                filled: true,
-                fillColor: loginFormColor,
-                ),
-            style: const TextStyle(color: Colors.white),
-            controller: nameController,
-            // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your name';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 15),
-          TextFormField(
-            decoration: InputDecoration(
-                hintText: "Email",
-                hintStyle: const TextStyle(color: Colors.white),
-                filled: true,
-                fillColor: loginFormColor,
-                ),
-            style: const TextStyle(color: Colors.white),
-            controller: emailController,
-            keyboardType: TextInputType.emailAddress,
-            // The validator receives the text that the user has entered.
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 15),
-          TextFormField(
-            controller: passwordController,
-            obscureText: true,
-            decoration: InputDecoration(
-                hintText: "Password",
-                hintStyle: const TextStyle(color: Colors.white),
-                filled: true,
-                fillColor: loginFormColor,
-                ),            style: const TextStyle(color: Colors.white),
-            validator: (value) {
-              if (value == null || value.isEmpty || value.length < 6) {
-                return 'Password must be 6 or more characters';
-              }
-              return null;
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  // Validate returns true if the form is valid, or false otherwise.
-                  if (_formKey.currentState!.validate()) {
-                    String? error = await registerAccount(
-                        emailController.text,
-                        nameController.text,
-                        passwordController.text);
-
-                    if (error == null) {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MainScreen(),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Container(
-                            height: 20,
-                            child: Center(
-                              child: Text('Failed to register user: ' + error, style: TextStyle(fontSize: 12)),
-                            ),
+      child: Padding(
+        padding: EdgeInsets.only(left: 30, right: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              decoration: InputDecoration(
+                  hintText: "Name",
+                  hintStyle: const TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: loginFormColor,
+                  ),
+              style: const TextStyle(color: Colors.white),
+              controller: nameController,
+              // The validator receives the text that the user has entered.
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your name';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 15),
+            TextFormField(
+              decoration: InputDecoration(
+                  hintText: "Email",
+                  hintStyle: const TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: loginFormColor,
+                  ),
+              style: const TextStyle(color: Colors.white),
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              // The validator receives the text that the user has entered.
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 15),
+            TextFormField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                  hintText: "Password",
+                  hintStyle: const TextStyle(color: Colors.white),
+                  filled: true,
+                  fillColor: loginFormColor,
+                  ),            style: const TextStyle(color: Colors.white),
+              validator: (value) {
+                if (value == null || value.isEmpty || value.length < 6) {
+                  return 'Password must be 6 or more characters';
+                }
+                return null;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Validate returns true if the form is valid, or false otherwise.
+                    if (_formKey.currentState!.validate()) {
+                      String? error = await registerAccount(
+                          emailController.text,
+                          nameController.text,
+                          passwordController.text);
+      
+                      if (error == null) {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MainScreen(),
                           ),
-                          backgroundColor: trifitColor[900],
-                        ),
-                      );
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Container(
+                              height: 20,
+                              child: Center(
+                                child: Text('Failed to register user: ' + error, style: TextStyle(fontSize: 12)),
+                              ),
+                            ),
+                            backgroundColor: trifitColor[900],
+                          ),
+                        );
+                      }
                     }
-                  }
-                },
-                child: const Text('REGISTER'),
+                  },
+                  child: const Text('REGISTER'),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
