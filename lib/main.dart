@@ -17,8 +17,8 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   @override
-  Future<User>? _calculation = Future<User>.delayed(
-    Duration(seconds: 2),
+  Future<User> _calculation = Future<User>.delayed(
+    Duration(seconds: 0),
     () => FirebaseAuth.instance.currentUser!,
   );
   // Firebase.initializeApp();
@@ -26,6 +26,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: MaterialColor(0xFFA545CC, trifitColor)),
       home: FutureBuilder<User>(
         future: _calculation,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {

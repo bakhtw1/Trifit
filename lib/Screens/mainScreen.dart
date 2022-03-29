@@ -52,21 +52,22 @@ class _MainScreenState extends State<MainScreen> {
         toolbarHeight: 40,
         backgroundColor: trifitColor[900],
         title: Text(_widgetOptionTitles.elementAt(_selectedIndex)),
-        // actions: <Widget>[
-        //   IconButton(
-        //     icon: Icon(
-        //       Icons.logout,
-        //       color: Colors.white,
-        //     ),
-        //     onPressed: () {
-        //       widget.appState.signOut();
-        //       Navigator.push(
-        //         context,
-        //         MaterialPageRoute(builder: (context) => LoginScreen()),
-        //       );
-        //     },
-        //   )
-        // ],
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.logout,
+              color: Colors.white,
+            ),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
+            },
+          )
+        ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
