@@ -195,8 +195,8 @@ class LoginFormState extends State<LoginForm> {
                         SnackBar(
                           content: Container(
                             height: 20,
-                            child: const Center(
-                              child: Text('Invalid Username/Password'),
+                            child: Center(
+                              child: Text("Failed to sign in: "+authErrorToString(e)),
                             ),
                           ),
                           backgroundColor: trifitColor[900],
@@ -212,6 +212,15 @@ class LoginFormState extends State<LoginForm> {
         ],
       ),
     );
+  }
+  String authErrorToString(FirebaseAuthException e) {
+    if (e.code == "user-not-found") {
+      return "User not found";
+    } else if (e.code == "wrong-password") {
+      return "Incorrect password";
+    } else {
+      return e.code;
+    }
   }
 }
 
@@ -294,12 +303,12 @@ class SignupFormState extends State<SignupForm> {
                 onPressed: () async {
                   // Validate returns true if the form is valid, or false otherwise.
                   if (_formKey.currentState!.validate()) {
-                    bool isRegistered = await registerAccount(
+                    String? error = await registerAccount(
                         emailController.text,
                         nameController.text,
                         passwordController.text);
 
-                    if (isRegistered) {
+                    if (error == null) {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
@@ -312,8 +321,8 @@ class SignupFormState extends State<SignupForm> {
                         SnackBar(
                           content: Container(
                             height: 20,
-                            child: const Center(
-                              child: Text('Failed to register user'),
+                            child: Center(
+                              child: Text('Failed to register user: ' + error, style: TextStyle(fontSize: 12)),
                             ),
                           ),
                           backgroundColor: trifitColor[900],
@@ -331,15 +340,25 @@ class SignupFormState extends State<SignupForm> {
     );
   }
 
-  Future<bool> registerAccount(
+  Future<String?> registerAccount(
       String email, String displayName, String password) async {
     try {
       var credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       await credential.user!.updateDisplayName(displayName);
-      return true;
+      return null;
     } on FirebaseAuthException catch (e) {
-      return false;
+      return authErrorToString(e);
+    }
+  }
+
+  String authErrorToString(FirebaseAuthException e) {
+    if (e.code == "email-already-in-use") {
+      return "Email address already in use.";
+    } else if (e.code == "invalid-email") {
+      return "Invalid email";
+    } else {
+      return e.code;
     }
   }
 }
