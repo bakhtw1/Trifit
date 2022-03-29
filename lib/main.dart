@@ -1,31 +1,42 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'Screens/login.dart';
+import 'Screens/mainScreen.dart';
 import 'utilities/Styles.dart';
 import 'firebase/ApplicationState.dart';
 import 'firebase/authentication.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ApplicationState(),
-      builder: (context, _) => const MyApp(),
-    ),
-  );
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  @override
+  Future<User>? _calculation = Future<User>.delayed(
+    Duration(seconds: 2),
+    () => FirebaseAuth.instance.currentUser!,
+  );
+  // Firebase.initializeApp();
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      color: Colors.white,
-      debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: FutureBuilder<User>(
+        future: _calculation,
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          print(snapshot.hasData);
+          if (snapshot.hasData) {
+            return const MainScreen();
+          } else {
+            return LoginScreen();
+          }
+        },
+      ),
     );
   }
 }

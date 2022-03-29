@@ -101,22 +101,22 @@ class Authentication extends StatelessWidget {
           },
         );
       case ApplicationLoginState.loggedIn:
-        // TextButton button = TextButton(
-        //   onPressed: () {
-        //     Navigator.pop(context);
-        //     Navigator.push(
-        //       context,
-        //       MaterialPageRoute(
-        //         builder: (context) => MainScreen(
-        //           appState: appState,
-        //         ),
-        //       ),
-        //     );
-        //   },
-        //   child: Text(""),
-        // );
-        // button.onPressed?.call();
-        return Text("");
+      // TextButton button = TextButton(
+      //   onPressed: () {
+      //     Navigator.pop(context);
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => MainScreen(
+      //           appState: appState,
+      //         ),
+      //       ),
+      //     );
+      //   },
+      //   child: Text(""),
+      // );
+      // button.onPressed?.call();
+      // return Text("hello");
 
       default:
         return Row(
@@ -374,7 +374,7 @@ class _PasswordFormState extends State<PasswordForm> {
     Navigator.pop(context);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => MainScreen(appState: appState)),
+      MaterialPageRoute(builder: (context) => MainScreen()),
     );
   }
 

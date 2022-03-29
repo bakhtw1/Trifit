@@ -11,8 +11,7 @@ import '../utilities/Styles.dart';
 import '../firebase/ApplicationState.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key, required this.appState}) : super(key: key);
-  final ApplicationState appState;
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -51,24 +50,23 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 40,
-        automaticallyImplyLeading: false,
         backgroundColor: trifitColor[900],
         title: Text(_widgetOptionTitles.elementAt(_selectedIndex)),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(
-              Icons.logout,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              widget.appState.signOut();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
-              );
-            },
-          )
-        ],
+        // actions: <Widget>[
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.logout,
+        //       color: Colors.white,
+        //     ),
+        //     onPressed: () {
+        //       widget.appState.signOut();
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(builder: (context) => LoginScreen()),
+        //       );
+        //     },
+        //   )
+        // ],
       ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
