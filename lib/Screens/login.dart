@@ -145,8 +145,12 @@ class LoginFormState extends State<LoginForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
-            decoration: const InputDecoration(
-                hintText: "Email", hintStyle: TextStyle(color: Colors.white)),
+            decoration: InputDecoration(
+                hintText: "Email",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+                ),
             style: const TextStyle(color: Colors.white),
             controller: emailController,
             // The validator receives the text that the user has entered.
@@ -161,9 +165,12 @@ class LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: passwordController,
             obscureText: true,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
                 hintText: "Password",
-                hintStyle: TextStyle(color: Colors.white)),
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+                ),
             style: const TextStyle(color: Colors.white),
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -196,7 +203,7 @@ class LoginFormState extends State<LoginForm> {
                           content: Container(
                             height: 20,
                             child: Center(
-                              child: Text("Failed to sign in: "+authErrorToString(e)),
+                              child: Text("Failed to sign in: " + authErrorToString(e)),
                             ),
                           ),
                           backgroundColor: trifitColor[900],
@@ -255,8 +262,12 @@ class SignupFormState extends State<SignupForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
-            decoration: const InputDecoration(
-                hintText: "Name", hintStyle: TextStyle(color: Colors.white)),
+            decoration: InputDecoration(
+                hintText: "Name",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+                ),
             style: const TextStyle(color: Colors.white),
             controller: nameController,
             // The validator receives the text that the user has entered.
@@ -269,8 +280,12 @@ class SignupFormState extends State<SignupForm> {
           ),
           const SizedBox(height: 15),
           TextFormField(
-            decoration: const InputDecoration(
-                hintText: "Email", hintStyle: TextStyle(color: Colors.white)),
+            decoration: InputDecoration(
+                hintText: "Email",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+                ),
             style: const TextStyle(color: Colors.white),
             controller: emailController,
             // The validator receives the text that the user has entered.
@@ -285,10 +300,12 @@ class SignupFormState extends State<SignupForm> {
           TextFormField(
             controller: passwordController,
             obscureText: true,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
                 hintText: "Password",
-                hintStyle: TextStyle(color: Colors.white)),
-            style: const TextStyle(color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+                ),            style: const TextStyle(color: Colors.white),
             validator: (value) {
               if (value == null || value.isEmpty || value.length < 6) {
                 return 'Password must be 6 or more characters';

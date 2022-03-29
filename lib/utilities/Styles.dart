@@ -24,6 +24,7 @@ Map<int, Color> trifitColor = {
 };
 
 Color bgColor = Color.fromRGBO(31, 31, 31, 1);
+Color loginFormColor = Color.fromRGBO(37, 37, 37, 1);
 
 TextStyle homeCardTitleTextStyle = const TextStyle(
   fontSize: 24,
