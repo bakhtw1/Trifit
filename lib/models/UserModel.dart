@@ -34,7 +34,7 @@ class UserModel {
     'email': email,
     // Need to implement toJson for these lists
     'meals': meals,
-    'steps': null,
+    'steps': steps,
     'followers': followers,
     'following': following,
     'registrationDate': registrationDate,

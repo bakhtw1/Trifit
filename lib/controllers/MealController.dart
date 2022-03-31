@@ -27,7 +27,7 @@ class MealController {
   getMealsForPastDays(int days) {
     var filteredMeals = [];
     for (int i = 0; i <= days; i++) {
-      filteredMeals.addAll(_getMealsForDay(simpleDate(DateTime.now()).subtract(Duration(days: i))));
+      filteredMeals.addAll(getMealsForDay(simpleDate(DateTime.now()).subtract(Duration(days: i))));
     }
     return filteredMeals;
   }
@@ -36,20 +36,19 @@ class MealController {
     var meals = [];
     for (var meal in allMeals) {
       if (meal["date"] == date.toString()) {
-        try { meals = meal["meals"];}
+        try { meals = meal;}
         catch(e) { meals = []; }
       }
     }
     return meals;
   }
 
-  _getMealsForDay(DateTime date) {
+  getMealsForDay(DateTime date) {
     return allMeals.where((i) => i["date"] == date.toString()).toList();
   }
 
   addMeal(MealModel toAdd, DateTime date) async {
     allMeals.add(toAdd.toJson());
-    List<dynamic> jsonMeals = [];
 
     FirebaseFirestore.instance
       .collection('users')

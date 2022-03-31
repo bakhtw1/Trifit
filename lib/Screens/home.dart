@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
+import '../models/StepModel.dart';
 import '../utilities/Styles.dart';
 import '../components/dropdown.dart';
 import '../components/expandableFab.dart';
@@ -30,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   List<Widget> mealCards = [];
   List<MealModel> mealModels = [];
   bool isLoading = true;
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = simpleDate(DateTime.now());
   bool isDecrementDateButtonDisabled = false;
   bool isIncrementDateButtonDisabled = true;
   List steps = [];
@@ -39,13 +42,21 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    selectedDate = simpleDate(selectedDate);
 
-    mealCards = [];
-    for (var meal in selectedMealData) {
-      mealCards.add(mealCard(meal));
-    }
-
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+      .collection('users')                            
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return CircularProgressIndicator();
+        } 
+        selectedMealData = mealController.getMealsForDay(selectedDate);
+        mealCards = [];
+        for (var meal in selectedMealData) {
+          mealCards.add(mealCard(meal));
+        }
     return Scaffold(
       body: Stack(
         children: [
@@ -77,14 +88,14 @@ class _HomePageState extends State<HomePage> {
 
             // Calorie summary card
             isLoading
-                ? calorieSummaryLoadingState()
+                ? SizedBox(height: 0)
                 : calorieSummary(
                     selectedMealData), // Calorie summary if data has been fetched, loading state if not
             Expanded(
                 child: ListView(
               shrinkWrap: true,
               children: isLoading
-                  ? mealsLoadingState()
+                  ? [SizedBox(height: 0)]
                   : [
                       ...mealCards,
                       SizedBox(height: 140)
@@ -114,7 +125,7 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-    );
+    );});
   }
 
   void showMealEntryDialog(reload) {
@@ -302,8 +313,7 @@ class _HomePageState extends State<HomePage> {
               TextButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    await stepController.addSteps(
-                        stepTextController.text, selectedDate);
+                    await stepController.addSteps(StepModel(stepTextController.text, selectedDate));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Successfully added steps'),
@@ -459,38 +469,10 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-  mealsLoadingState() {
-    List<Container> loadingState = [];
-    for (int i = 0; i < 4; i++) {
-      loadingState.add(Container(
-          // This manages to maintain proper heights without using expanded
-          height: 200,
-          padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-          child: SizedBox.expand(
-              child: Card(
-                  color: Color(0xFFEEEEEE),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5))))));
-    }
-    return loadingState;
-  }
-
-  calorieSummaryLoadingState() {
-    return Container(
-        height: 140,
-        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-        child: SizedBox.expand(
-            child: Card(
-          color: Color(0xFFEEEEEE),
-        )));
-  }
-
-// In the future this will be used to make a network call to fetch the data, for now it's using a local json file
   loadJson() async {
     isLoading = true;
-    //await Future.delayed(Duration(seconds: 1)); // Uncomment to verify loading states working
-    await stepController.loadSteps();
-
+    await Future.delayed(Duration(milliseconds: 10)); // Uncomment to verify loading states working
+    
     setState(() {
       selectedMealData = mealController.allMeals
           .where((i) => DateTime.parse(i["date"]) == selectedDate)
