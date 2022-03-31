@@ -490,7 +490,6 @@ class _HomePageState extends State<HomePage> {
     isLoading = true;
     //await Future.delayed(Duration(seconds: 1)); // Uncomment to verify loading states working
     await stepController.loadSteps();
-    await mealController.loadMeals(selectedDate);
 
     setState(() {
       selectedMealData = mealController.allMeals

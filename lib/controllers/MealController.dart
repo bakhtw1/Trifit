@@ -1,10 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:trifit/utilities/FileReadWrite.dart';
 import '../models/MealModel.dart';
 import '../utilities/UtilityFunctions.dart';
 
 class MealController {
   var allMeals = [];
+  late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> mealSubscription;
+
+  MealController() {
+      mealSubscription = FirebaseFirestore.instance
+      .collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .snapshots()
+      .listen((snapshot) {
+        var data = snapshot.data();
+        if (data != null) {
+          allMeals = data['meals'];
+        }
+    });
+  }
 
   // Fetches meal data for the current day and days-1 previous days
   getMealsForPastDays(int days) {
@@ -26,27 +43,18 @@ class MealController {
     return meals;
   }
 
-  // Fetches all meal data
-  loadMeals(DateTime date) async {
-    var file = FileReadWrite("mealdata-$date.json");
-    var content = await file.read();
-    try { allMeals = json.decode(content); } on Exception catch (_) {
-      allMeals = [];
-    }
-  }
-
   _getMealsForDay(DateTime date) {
     return allMeals.where((i) => i["date"] == date.toString()).toList();
   }
 
   addMeal(MealModel toAdd, DateTime date) async {
-    var mealFile = FileReadWrite("mealdata-$date.json");
-    String mealData = await mealFile.read();
+    allMeals.add(toAdd.toJson());
+    List<dynamic> jsonMeals = [];
 
-    await loadMeals(date);
-
-    allMeals.add(toAdd);
-    writeJson("mealdata-$date.json", jsonEncode(allMeals));
+    FirebaseFirestore.instance
+      .collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .update({"meals":allMeals});
   }
 
   int calorieIntakeForDate(DateTime date) {

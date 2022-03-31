@@ -36,7 +36,6 @@ class MyApp extends StatelessWidget {
       home: FutureBuilder<User>(
         future: _calculation,
         builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-          print(snapshot.hasData);
           if (snapshot.hasData) {
             return const MainScreen();
           } else {

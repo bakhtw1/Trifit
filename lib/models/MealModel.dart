@@ -16,7 +16,6 @@ class MealModel {
 
   @override
   String toString() {
-    // TODO: implement toString
     String mealString = "Meal type: "+mealType + "\nItems: \n";
     mealString += "Date: "+date.toString();
     for (var item in items) {

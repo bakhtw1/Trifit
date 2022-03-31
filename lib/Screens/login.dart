@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:trifit/Screens/home.dart';
 import 'package:trifit/Screens/mainScreen.dart';
+import 'package:trifit/models/UserModel.dart';
 import 'package:trifit/utilities/Styles.dart';
 import '../firebase/ApplicationState.dart';
 import '../firebase/authentication.dart';
@@ -339,6 +341,7 @@ class SignupFormState extends State<SignupForm> {
                           passwordController.text);
       
                       if (error == null) {
+                        await createUserEntry(FirebaseAuth.instance.currentUser!.uid, emailController.text, nameController.text);
                         Navigator.pop(context);
                         Navigator.push(
                           context,
@@ -381,6 +384,20 @@ class SignupFormState extends State<SignupForm> {
     } on FirebaseAuthException catch (e) {
       return authErrorToString(e);
     }
+  }
+  
+  Future<String?> createUserEntry (String uid, String email, String name) async {
+    try {
+      await FirebaseFirestore.instance
+        .collection('users')
+        // Using .doc(uid).set lets us define the document to have an ID that is the same as the uid
+        // This should make it easier to lookup user data later on
+        .doc(uid)
+        .set(UserModel(uid, name, email).toJson());
+    } catch (e) {
+      return e.toString();
+    } 
+    return null;
   }
 
   String authErrorToString(FirebaseAuthException e) {
