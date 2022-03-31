@@ -52,6 +52,16 @@ class MealController {
       .collection('users')
       .doc(FirebaseAuth.instance.currentUser!.uid)
       .update({"meals":allMeals});
+    List<Map<String, dynamic>> items = [];
+    for (var item in toAdd.items)
+      items.add(item.toJson());
+    FirebaseFirestore.instance
+      .collection('meals')
+      .add({
+        "date":allMeals,
+        "items": items,
+        "uid": FirebaseAuth.instance.currentUser!.uid
+      });
   }
 
   int calorieIntakeForDate(DateTime date) {
