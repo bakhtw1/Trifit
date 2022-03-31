@@ -57,75 +57,77 @@ class _HomePageState extends State<HomePage> {
         for (var meal in selectedMealData) {
           mealCards.add(mealCard(meal));
         }
-    return Scaffold(
-      body: Stack(
-        children: [
-          Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
-                      onPressed: isDecrementDateButtonDisabled
-                          ? null
-                          : () {
-                              incrementSelectedDate(-1);
-                            },
-                    ),
-                    selectedDateLabel(),
-                    IconButton(
-                      icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: isIncrementDateButtonDisabled
-                          ? null
-                          : () {
-                              incrementSelectedDate(1);
-                            },
-                    )
-                  ],
-                )),
+        return Scaffold(
+          body: Stack(
+            children: [
+              Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          onPressed: isDecrementDateButtonDisabled
+                              ? null
+                              : () {
+                                  incrementSelectedDate(-1);
+                                },
+                        ),
+                        selectedDateLabel(),
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: isIncrementDateButtonDisabled
+                              ? null
+                              : () {
+                                  incrementSelectedDate(1);
+                                },
+                        )
+                      ],
+                    )),
 
-            // Calorie summary card
-            isLoading
-                ? SizedBox(height: 0)
-                : calorieSummary(
-                    selectedMealData), // Calorie summary if data has been fetched, loading state if not
-            Expanded(
-                child: ListView(
-              shrinkWrap: true,
-              children: isLoading
-                  ? [SizedBox(height: 0)]
-                  : [
-                      ...mealCards,
-                      SizedBox(height: 140)
-                    ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
-            )),
-          ]),
-        ],
-      ),
-      floatingActionButton: ExpandableFab(
-        distance: 60.0,
-        children: [
-          ActionButton(
-            onPressed: () => showStepEntryDialog(() => {
-                  setState(() {
-                    loadJson();
-                  })
-                }),
-            icon: const Icon(Icons.directions_walk_outlined),
+                // Calorie summary card
+                isLoading
+                    ? SizedBox(height: 0)
+                    : calorieSummary(
+                        selectedMealData), // Calorie summary if data has been fetched, loading state if not
+                Expanded(
+                    child: ListView(
+                  shrinkWrap: true,
+                  children: isLoading
+                      ? [SizedBox(height: 0)]
+                      : [
+                          ...mealCards,
+                          SizedBox(height: 140)
+                        ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
+                )),
+              ]),
+            ],
           ),
-          ActionButton(
-            onPressed: () => showMealEntryDialog(() => {
-                  setState(() {
-                    loadJson();
-                  })
-                }),
-            icon: const Icon(Icons.restaurant),
-          )
-        ],
-      ),
-    );});
+          floatingActionButton: ExpandableFab(
+            distance: 60.0,
+            children: [
+              ActionButton(
+                onPressed: () => showStepEntryDialog(() => {
+                      setState(() {
+                        loadJson();
+                      })
+                    }),
+                icon: const Icon(Icons.directions_walk_outlined),
+              ),
+              ActionButton(
+                onPressed: () => showMealEntryDialog(() => {
+                      setState(() {
+                        loadJson();
+                      })
+                    }),
+                icon: const Icon(Icons.restaurant),
+              )
+            ],
+          ),
+        );
+      }
+    );
   }
 
   void showMealEntryDialog(reload) {

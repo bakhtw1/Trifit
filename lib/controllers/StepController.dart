@@ -12,7 +12,7 @@ class StepController {
   late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> stepSubscription;
 
   StepController() {
-      stepSubscription = FirebaseFirestore.instance
+    stepSubscription = FirebaseFirestore.instance
       .collection('users')
       .doc(FirebaseAuth.instance.currentUser!.uid)
       .snapshots()
@@ -39,27 +39,22 @@ class StepController {
 
   getStepsForDate(DateTime date) {
     var stepCount = 0.0;
-    for (var step in allSteps) {
-      if (step["date"] == date.toString()) {
-        try { stepCount = double.parse(step["steps"]);}
-        catch(e) { stepCount = 0; }
-      }
+    for (var step in _getStepsForDay(date)) {
+      try { stepCount += double.parse(step["steps"]);}
+      catch(e) { stepCount += 0; }
     }
     return stepCount;
   }
 
   _getStepsForDay(DateTime day) {
-   // print(allSteps.where((i) => i["date"] == day.toString()).toList());
     return allSteps.where((i) => i["date"] == day.toString()).toList();
   }
 
   addSteps(StepModel toAdd) async {
-    print(allSteps);
-      allSteps.add(toAdd.toJson());
-
-      FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .update({"steps":allSteps});
+    allSteps.add(toAdd.toJson());
+    FirebaseFirestore.instance
+      .collection('users')
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .update({"steps":allSteps});
   }
 }
