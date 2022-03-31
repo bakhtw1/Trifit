@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
-import '../assets/Styles.dart';
+import '../utilities/Styles.dart';
 import '../components/dropdown.dart';
 import '../components/expandableFab.dart';
 import '../controllers/MealController.dart';
@@ -324,9 +324,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   MealModel makeMealModel(
-    String mealType,
-    List<TextEditingController> itemControllers,
-    List<TextEditingController> calorieControllers) {
+      String mealType,
+      List<TextEditingController> itemControllers,
+      List<TextEditingController> calorieControllers) {
     List<Item> items = [];
     for (int i = 0; i < itemControllers.length; i++) {
       items.add(
@@ -373,11 +373,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget calorieSummary(List meals) {
-    int calsFromFood = 
-      isLoading ? 0 : mealController.calorieIntakeForDate(selectedDate);
+    int calsFromFood =
+        isLoading ? 0 : mealController.calorieIntakeForDate(selectedDate);
     // Active walking calories can very loosely be calculated as 0.04 * number of steps
     int calsFromExercise =
-      isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
+        isLoading ? 0 : (stepController.getActiveCaloriesForDate(selectedDate));
     String netCals = (calsFromFood - calsFromExercise).toString();
 
     return Container(

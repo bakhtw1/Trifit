@@ -1,103 +1,48 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'screens/screens.dart';
-import 'assets/Styles.dart' as tfStyle;
-void main() {
-  runApp(const MyApp());
+import 'package:provider/provider.dart';
+import 'package:trifit/utilities/firebase_options.dart';
+import 'Screens/login.dart';
+import 'Screens/mainScreen.dart';
+import 'utilities/Styles.dart';
+import 'firebase/ApplicationState.dart';
+import 'firebase/authentication.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  @override
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Future<User>? _calculation;
+    try {
+        _calculation = Future<User>.delayed(
+        Duration(seconds: 0),
+        () => FirebaseAuth.instance.currentUser!,
+      );
+    } catch (e) {
+      _calculation = null;
+    }
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch:MaterialColor(0xFFA545CC, tfStyle.trifitColor)
-      ),
       debugShowCheckedModeBanner: false,
-      home: const MyStatefulWidget(),
-    );
-  }
-}
-
-class MyStatefulWidget extends StatefulWidget {
-  const MyStatefulWidget({Key? key}) : super(key: key);
-
-  @override
-  State<MyStatefulWidget> createState() => _MyStatefulWidgetState();
-}
-
-class _MyStatefulWidgetState extends State<MyStatefulWidget> {
-  int _selectedIndex = 0;
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomePage(),
-    Metrics(),
-    Feed(),
-    Challenges(),
-    Profile()
-  ];
-
-  /*
-    Should probably have each screen be a subclass of some extension of StatefulWidget that has a title
-    field instead of having this separate list and separate variables in each class
-  */
-  static const List<String> _widgetOptionTitles = <String>[
-    "Home",
-    "Metrics",
-    "Feed",
-    "Challenges",
-    "Profile"
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 40,
-        title: Text(_widgetOptionTitles.elementAt(_selectedIndex)),
-      ),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined, size: 32),
-            activeIcon: Icon(Icons.home, size: 32),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.stacked_line_chart, size: 32),
-            label: 'Metrics',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.at, size: 32),
-            label: 'Feed',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star_border_outlined, size: 32),
-            activeIcon: Icon(Icons.star, size: 32),
-            label: 'Challenges',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline, size: 32),
-            activeIcon: Icon(Icons.person, size: 32),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: tfStyle.trifitColor[900],
-        onTap: _onItemTapped,
+      theme: ThemeData(primarySwatch: MaterialColor(0xFFA545CC, trifitColor)),
+      home: FutureBuilder<User>(
+        future: _calculation,
+        builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
+          print(snapshot.hasData);
+          if (snapshot.hasData) {
+            return const MainScreen();
+          } else {
+            return LoginScreen();
+          }
+        },
       ),
     );
   }

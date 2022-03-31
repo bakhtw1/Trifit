@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../assets/Styles.dart';
+import '../utilities/Styles.dart';
 import '../data/profile.dart';
 import '../components/friendList.dart';
 
