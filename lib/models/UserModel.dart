@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:trifit/models/MealModel.dart';
 import 'package:trifit/models/StepModel.dart';
 import '../utilities/UtilityFunctions.dart';
 
