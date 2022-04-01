@@ -11,8 +11,6 @@ class UserModel {
   String uid;
   String name;
   String email;
-  List<dynamic> meals = [];
-  List<StepModel> steps = [];
   // List of uids for followers/following
   List<String> followers = [];
   List<String> following = [];
@@ -30,8 +28,6 @@ class UserModel {
     'name': name,
     'email': email,
     // Need to implement toJson for these lists
-    'meals': meals,
-    'steps': steps,
     'followers': followers,
     'following': following,
     'registrationDate': registrationDate,

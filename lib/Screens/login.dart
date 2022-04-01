@@ -397,6 +397,22 @@ class SignupFormState extends State<SignupForm> {
     } catch (e) {
       return e.toString();
     } 
+    try {
+      await FirebaseFirestore.instance
+        .collection('meals')
+        .doc(uid)
+        .set({"meals": []});
+    } catch (e) {
+      return e.toString();
+    } 
+    try {
+      await FirebaseFirestore.instance
+        .collection('exercise')
+        .doc(uid)
+        .set({"workouts": []});
+    } catch (e) {
+      return e.toString();
+    } 
     return null;
   }
 

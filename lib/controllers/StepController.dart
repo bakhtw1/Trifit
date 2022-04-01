@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trifit/models/ExerciseModel.dart';
 import '../models/StepModel.dart';
 import '../utilities/UtilityFunctions.dart';
 
@@ -11,13 +12,13 @@ class StepController {
 
   StepController() {
     stepSubscription = FirebaseFirestore.instance
-      .collection('users')
+      .collection('exercise')
       .doc(FirebaseAuth.instance.currentUser!.uid)
       .snapshots()
       .listen((snapshot) {
         var data = snapshot.data();
         if (data != null) {
-          allSteps = data['steps'];
+          allSteps = (data['workouts'] as List<dynamic>).where((i) => i['type'] == 'steps').toList();
         }
     });
   }
@@ -38,21 +39,23 @@ class StepController {
   getStepsForDate(DateTime date) {
     var stepCount = 0.0;
     for (var step in _getStepsForDay(date)) {
-      try { stepCount += double.parse(step["steps"]);}
+      try { stepCount += double.parse(step['workout']['steps']);}
       catch(e) { stepCount += 0; }
     }
     return stepCount;
   }
 
   _getStepsForDay(DateTime day) {
-    return allSteps.where((i) => i["date"] == day.toString()).toList();
+    return allSteps.where((i) => i["date"] == Timestamp.fromDate(day)).toList();
   }
 
   addSteps(StepModel toAdd) async {
+    var exercise = ExerciseModel("steps", toAdd, toAdd.calories.toDouble(), toAdd.date);
     allSteps.add(toAdd.toJson());
     FirebaseFirestore.instance
-      .collection('users')
+      .collection('exercise')
       .doc(FirebaseAuth.instance.currentUser!.uid)
-      .update({"steps":allSteps});
+      .update({"workouts":FieldValue.arrayUnion([exercise.toJson()])});
   }
+
 }

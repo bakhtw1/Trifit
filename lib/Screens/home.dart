@@ -43,9 +43,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
+    /*
+      Using this streambuilder allows the page to wait until it has all of the necessary data
+      fetched and ready to go before
+    */
     return StreamBuilder(
       stream: FirebaseFirestore.instance
-      .collection('users')                            
+      .collection('meals')                            
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .snapshots(),
       builder: (context, snapshot) {

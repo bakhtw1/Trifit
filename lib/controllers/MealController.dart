@@ -10,7 +10,7 @@ class MealController {
 
   MealController() {
       mealSubscription = FirebaseFirestore.instance
-      .collection('users')
+      .collection('meals')
       .doc(FirebaseAuth.instance.currentUser!.uid)
       .snapshots()
       .listen((snapshot) {
@@ -46,21 +46,17 @@ class MealController {
   }
 
   addMeal(MealModel toAdd, DateTime date) async {
-    allMeals.add(toAdd.toJson());
+    // allMeals.add(toAdd.toJson());
 
-    FirebaseFirestore.instance
-      .collection('users')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .update({"meals":allMeals});
-    List<Map<String, dynamic>> items = [];
-    for (var item in toAdd.items)
-      items.add(item.toJson());
+    // FirebaseFirestore.instance
+    //   .collection('users')
+    //   .doc(FirebaseAuth.instance.currentUser!.uid)
+    //   .update({"meals":allMeals});
     FirebaseFirestore.instance
       .collection('meals')
-      .add({
-        "date":allMeals,
-        "items": items,
-        "uid": FirebaseAuth.instance.currentUser!.uid
+      .doc(FirebaseAuth.instance.currentUser!.uid)
+      .update({
+        "meals": FieldValue.arrayUnion([toAdd.toJson()])
       });
   }
 
@@ -70,9 +66,7 @@ class MealController {
       .toList();
     int cals = 0;
     for (var meal in selectedMealData) {
-      for (var item in meal["items"]) {
-        cals += item["calories"] as int;
-      }
+      cals += meal["calories"] as int;
     }
     return cals;
   }
