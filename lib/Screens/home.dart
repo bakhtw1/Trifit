@@ -20,12 +20,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Need to call loadJson while initializing the screen
+  // Need to call load while initializing the screen
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      await loadJson();
+      await load();
     });
   }
 
@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
               ActionButton(
                 onPressed: () => showStepEntryDialog(() => {
                       setState(() {
-                        loadJson();
+                        load();
                       })
                     }),
                 icon: const Icon(Icons.directions_walk_outlined),
@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
               ActionButton(
                 onPressed: () => showMealEntryDialog(() => {
                       setState(() {
-                        loadJson();
+                        load();
                       })
                     }),
                 icon: const Icon(Icons.restaurant),
@@ -475,9 +475,8 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-  loadJson() async {
+  load() async {
     isLoading = true;
-    await Future.delayed(Duration(milliseconds: 10)); // Uncomment to verify loading states working
     
     setState(() {
       selectedMealData = mealController.allMeals
@@ -501,7 +500,7 @@ class _HomePageState extends State<HomePage> {
         isIncrementDateButtonDisabled = false;
       }
     });
-    loadJson();
+    load();
   }
 
   selectedDateLabel() {
