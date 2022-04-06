@@ -46,12 +46,6 @@ class MealController {
   }
 
   addMeal(MealModel toAdd, DateTime date) async {
-    // allMeals.add(toAdd.toJson());
-
-    // FirebaseFirestore.instance
-    //   .collection('users')
-    //   .doc(FirebaseAuth.instance.currentUser!.uid)
-    //   .update({"meals":allMeals});
     FirebaseFirestore.instance
       .collection('meals')
       .doc(FirebaseAuth.instance.currentUser!.uid)
