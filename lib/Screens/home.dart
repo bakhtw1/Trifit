@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
+import '../models/StepModel.dart';
 import '../utilities/Styles.dart';
 import '../components/dropdown.dart';
 import '../components/expandableFab.dart';
@@ -17,12 +20,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Need to call loadJson while initializing the screen
+  // Need to call load while initializing the screen
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance?.addPostFrameCallback((_) async {
-      await loadJson();
+      await load();
     });
   }
 
@@ -30,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   List<Widget> mealCards = [];
   List<MealModel> mealModels = [];
   bool isLoading = true;
-  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate = simpleDate(DateTime.now());
   bool isDecrementDateButtonDisabled = false;
   bool isIncrementDateButtonDisabled = true;
   List steps = [];
@@ -39,81 +42,95 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    selectedDate = simpleDate(selectedDate);
 
-    mealCards = [];
-    for (var meal in selectedMealData) {
-      mealCards.add(mealCard(meal));
-    }
+    /*
+      Using this streambuilder allows the page to wait until it has all of the necessary data
+      fetched and ready to go before
+    */
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+      .collection('meals')                            
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return CircularProgressIndicator();
+        } 
+        selectedMealData = mealController.getMealsForDay(selectedDate);
+        mealCards = [];
+        for (var meal in selectedMealData) {
+          mealCards.add(mealCard(meal));
+        }
+        return Scaffold(
+          body: Stack(
+            children: [
+              Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+                Padding(
+                    padding: EdgeInsets.only(top: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios),
+                          onPressed: isDecrementDateButtonDisabled
+                              ? null
+                              : () {
+                                  incrementSelectedDate(-1);
+                                },
+                        ),
+                        selectedDateLabel(),
+                        IconButton(
+                          icon: Icon(Icons.arrow_forward_ios),
+                          onPressed: isIncrementDateButtonDisabled
+                              ? null
+                              : () {
+                                  incrementSelectedDate(1);
+                                },
+                        )
+                      ],
+                    )),
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-            Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
-                      onPressed: isDecrementDateButtonDisabled
-                          ? null
-                          : () {
-                              incrementSelectedDate(-1);
-                            },
-                    ),
-                    selectedDateLabel(),
-                    IconButton(
-                      icon: Icon(Icons.arrow_forward_ios),
-                      onPressed: isIncrementDateButtonDisabled
-                          ? null
-                          : () {
-                              incrementSelectedDate(1);
-                            },
-                    )
-                  ],
+                // Calorie summary card
+                isLoading
+                    ? SizedBox(height: 0)
+                    : calorieSummary(
+                        selectedMealData), // Calorie summary if data has been fetched, loading state if not
+                Expanded(
+                    child: ListView(
+                  shrinkWrap: true,
+                  children: isLoading
+                      ? [SizedBox(height: 0)]
+                      : [
+                          ...mealCards,
+                          SizedBox(height: 140)
+                        ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
                 )),
-
-            // Calorie summary card
-            isLoading
-                ? calorieSummaryLoadingState()
-                : calorieSummary(
-                    selectedMealData), // Calorie summary if data has been fetched, loading state if not
-            Expanded(
-                child: ListView(
-              shrinkWrap: true,
-              children: isLoading
-                  ? mealsLoadingState()
-                  : [
-                      ...mealCards,
-                      SizedBox(height: 140)
-                    ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
-            )),
-          ]),
-        ],
-      ),
-      floatingActionButton: ExpandableFab(
-        distance: 60.0,
-        children: [
-          ActionButton(
-            onPressed: () => showStepEntryDialog(() => {
-                  setState(() {
-                    loadJson();
-                  })
-                }),
-            icon: const Icon(Icons.directions_walk_outlined),
+              ]),
+            ],
           ),
-          ActionButton(
-            onPressed: () => showMealEntryDialog(() => {
-                  setState(() {
-                    loadJson();
-                  })
-                }),
-            icon: const Icon(Icons.restaurant),
-          )
-        ],
-      ),
+          floatingActionButton: ExpandableFab(
+            distance: 60.0,
+            children: [
+              ActionButton(
+                onPressed: () => showStepEntryDialog(() => {
+                      setState(() {
+                        load();
+                      })
+                    }),
+                icon: const Icon(Icons.directions_walk_outlined),
+              ),
+              ActionButton(
+                onPressed: () => showMealEntryDialog(() => {
+                      setState(() {
+                        load();
+                      })
+                    }),
+                icon: const Icon(Icons.restaurant),
+              )
+            ],
+          ),
+        );
+      }
     );
   }
 
@@ -302,8 +319,7 @@ class _HomePageState extends State<HomePage> {
               TextButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    await stepController.addSteps(
-                        stepTextController.text, selectedDate);
+                    await stepController.addSteps(StepModel(stepTextController.text, selectedDate));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Successfully added steps'),
@@ -459,39 +475,9 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 
-  mealsLoadingState() {
-    List<Container> loadingState = [];
-    for (int i = 0; i < 4; i++) {
-      loadingState.add(Container(
-          // This manages to maintain proper heights without using expanded
-          height: 200,
-          padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-          child: SizedBox.expand(
-              child: Card(
-                  color: Color(0xFFEEEEEE),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5))))));
-    }
-    return loadingState;
-  }
-
-  calorieSummaryLoadingState() {
-    return Container(
-        height: 140,
-        padding: EdgeInsets.only(left: 10, right: 10, top: 10),
-        child: SizedBox.expand(
-            child: Card(
-          color: Color(0xFFEEEEEE),
-        )));
-  }
-
-// In the future this will be used to make a network call to fetch the data, for now it's using a local json file
-  loadJson() async {
+  load() async {
     isLoading = true;
-    //await Future.delayed(Duration(seconds: 1)); // Uncomment to verify loading states working
-    await stepController.loadSteps();
-    await mealController.loadMeals(selectedDate);
-
+    
     setState(() {
       selectedMealData = mealController.allMeals
           .where((i) => DateTime.parse(i["date"]) == selectedDate)
@@ -514,7 +500,7 @@ class _HomePageState extends State<HomePage> {
         isIncrementDateButtonDisabled = false;
       }
     });
-    loadJson();
+    load();
   }
 
   selectedDateLabel() {
