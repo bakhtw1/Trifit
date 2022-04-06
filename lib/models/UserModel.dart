@@ -27,7 +27,6 @@ class UserModel {
     'uid': uid,
     'name': name,
     'email': email,
-    // Need to implement toJson for these lists
     'followers': followers,
     'following': following,
     'registrationDate': registrationDate,
