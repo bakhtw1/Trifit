@@ -30,6 +30,7 @@ class MealController {
     return filteredMeals;
   }
 
+  // Returns a json array of objects equivalent to the 'MealModel' class
   getMealsForDay(DateTime date) {
     return allMeals.where((i) => i["date"] == date.toString()).toList();
   }
@@ -43,6 +44,7 @@ class MealController {
       });
   }
 
+  // Returns the total calorie intake from meals on a given date as an int
   int calorieIntakeForDate(DateTime date) {
     var selectedMealData = allMeals
       .where((i) => DateTime.parse(i["date"]) == date)
