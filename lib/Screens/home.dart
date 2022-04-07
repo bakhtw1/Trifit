@@ -63,7 +63,6 @@ class _HomePageState extends State<HomePage> {
         for (var meal in selectedMealData) {
           mealCards.add(mealCard(meal));
         }
-        print(weightController.getAverageWeightForMonth(2022, 4));
         return Scaffold(
           body: Stack(
             children: [

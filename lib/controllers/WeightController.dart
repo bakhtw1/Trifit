@@ -21,19 +21,12 @@ class WeightController {
     });
   }
 
-  // Fetches weight data for the current day and days-1 previous days
-  getWeightsForPastDays(int days) {
-    var filteredWeights = [];
-    for (int i = 0; i <= days; i++) {
-      filteredWeights.addAll(getWeightsForDay(simpleDate(DateTime.now()).subtract(Duration(days: i))));
-    }
-    return filteredWeights;
-  }
-
+  // Gets weights for a specific day as an array of json objects
   getWeightsForDay(DateTime date) {
     return allWeights.where((i) => i["date"] == date.toString()).toList();
   }
 
+  // Returns the average weight for a given year and month as a double
   getAverageWeightForMonth(int year, int month) {
     double totalWeight = 0;
     int numWeights = 0;
