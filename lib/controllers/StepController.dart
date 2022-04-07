@@ -23,7 +23,7 @@ class StepController {
     });
   }
 
-  // Fetches step data for the current day and days-1 previous days
+  // Fetches step data for the current day and days-1 previous days as a json array
   getStepsForPastDays(int days) {
     var filteredSteps = [];
     for (int i = 0; i <= days; i++) {
@@ -32,19 +32,22 @@ class StepController {
     return filteredSteps;
   }
 
+  // Returns an integer value of the active calories for a given date
   getActiveCaloriesForDate(DateTime date) {
     return (getStepsForDate(date)*0.04).ceil();
   }
 
+  // Returns an integer value for the number of steps on a given date
   getStepsForDate(DateTime date) {
     var stepCount = 0.0;
     for (var step in _getStepsForDay(date)) {
-      try { stepCount += double.parse(step['workout']['steps']);}
+      try { stepCount += step['workout']['steps'];}
       catch(e) { stepCount += 0; }
     }
     return stepCount;
   }
 
+  // Returns json array containing all step data for a date
   _getStepsForDay(DateTime day) {
     return allSteps.where((i) => i["date"] == Timestamp.fromDate(day)).toList();
   }

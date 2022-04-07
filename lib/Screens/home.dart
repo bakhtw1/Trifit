@@ -3,13 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
+import '../controllers/WeightController.dart';
 import '../models/StepModel.dart';
+import '../models/WeightModel.dart';
+import '../screens/custom-icons.dart';
 import '../utilities/Styles.dart';
 import '../components/dropdown.dart';
 import '../components/expandableFab.dart';
 import '../controllers/MealController.dart';
 import 'package:intl/intl.dart';
-
 import '../utilities/UtilityFunctions.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,7 +41,7 @@ class _HomePageState extends State<HomePage> {
   List steps = [];
   var stepController = StepController();
   var mealController = MealController();
-
+  var weightController = WeightController();
   @override
   Widget build(BuildContext context) {
 
@@ -61,6 +63,7 @@ class _HomePageState extends State<HomePage> {
         for (var meal in selectedMealData) {
           mealCards.add(mealCard(meal));
         }
+        print(weightController.getAverageWeightForMonth(2022, 4));
         return Scaffold(
           body: Stack(
             children: [
@@ -109,7 +112,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
           floatingActionButton: ExpandableFab(
-            distance: 60.0,
+            distance: 80.0,
             children: [
               ActionButton(
                 onPressed: () => showStepEntryDialog(() => {
@@ -118,6 +121,14 @@ class _HomePageState extends State<HomePage> {
                       })
                     }),
                 icon: const Icon(Icons.directions_walk_outlined),
+              ),
+              ActionButton(
+                onPressed: () => showWeightEntryDialog(() => {
+                      setState(() {
+                        load();
+                      })
+                    }),
+                icon: const Icon(CustomIcons.test, size: 24),
               ),
               ActionButton(
                 onPressed: () => showMealEntryDialog(() => {
@@ -286,30 +297,32 @@ class _HomePageState extends State<HomePage> {
             content: Container(
               width: 200,
               child: SingleChildScrollView(
-                  child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 100,
-                            child: TextFormField(
-                              keyboardType: TextInputType.number,
-                              controller: stepTextController,
-                              decoration: InputDecoration(hintText: "Steps"),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Required';
-                                }
-                                if (num.tryParse(value) == null) {
-                                  return 'Must be number';
-                                }
-                                return null;
-                              },
-                            ),
-                          )
-                        ],
-                      ))),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 100,
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          controller: stepTextController,
+                          decoration: InputDecoration(hintText: "Steps"),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required';
+                            }
+                            if (num.tryParse(value) == null) {
+                              return 'Must be number';
+                            }
+                            return null;
+                          },
+                        ),
+                      )
+                    ],
+                  )
+                )
+              ),
             ),
             actions: [
               TextButton(
@@ -331,6 +344,76 @@ class _HomePageState extends State<HomePage> {
                   }
                 },
                 child: Text('Add'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  void showWeightEntryDialog(reload) {
+    final _formKey = GlobalKey<FormState>();
+
+    TextEditingController weightTextController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Update weight'),
+            insetPadding: EdgeInsets.zero,
+            content: Container(
+              width: 200,
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 100,
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          controller: weightTextController,
+                          decoration: InputDecoration(hintText: "Weight (lbs)"),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Required';
+                            }
+                            if (num.tryParse(value) == null) {
+                              return 'Must be number';
+                            }
+                            return null;
+                          },
+                        ),
+                      )
+                    ],
+                  )
+                )
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await weightController.addWeight(WeightModel(weightTextController.text, selectedDate));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Successfully updated weight'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    reload();
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text('Update'),
               ),
             ],
           );

@@ -30,17 +30,6 @@ class MealController {
     return filteredMeals;
   }
 
-  getMealsForDate(DateTime date) {
-    var meals = [];
-    for (var meal in allMeals) {
-      if (meal["date"] == date.toString()) {
-        try { meals = meal;}
-        catch(e) { meals = []; }
-      }
-    }
-    return meals;
-  }
-
   getMealsForDay(DateTime date) {
     return allMeals.where((i) => i["date"] == date.toString()).toList();
   }

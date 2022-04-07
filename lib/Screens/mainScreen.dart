@@ -8,7 +8,6 @@ import 'screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../utilities/Styles.dart';
-import '../firebase/ApplicationState.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
