@@ -30,17 +30,7 @@ class MealController {
     return filteredMeals;
   }
 
-  getMealsForDate(DateTime date) {
-    var meals = [];
-    for (var meal in allMeals) {
-      if (meal["date"] == date.toString()) {
-        try { meals = meal;}
-        catch(e) { meals = []; }
-      }
-    }
-    return meals;
-  }
-
+  // Returns a json array of objects equivalent to the 'MealModel' class
   getMealsForDay(DateTime date) {
     return allMeals.where((i) => i["date"] == date.toString()).toList();
   }
@@ -54,6 +44,7 @@ class MealController {
       });
   }
 
+  // Returns the total calorie intake from meals on a given date as an int
   int calorieIntakeForDate(DateTime date) {
     var selectedMealData = allMeals
       .where((i) => DateTime.parse(i["date"]) == date)

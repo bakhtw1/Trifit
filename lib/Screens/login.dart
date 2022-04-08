@@ -7,8 +7,6 @@ import 'package:trifit/Screens/home.dart';
 import 'package:trifit/Screens/mainScreen.dart';
 import 'package:trifit/models/UserModel.dart';
 import 'package:trifit/utilities/Styles.dart';
-import '../firebase/ApplicationState.dart';
-import '../firebase/authentication.dart';
 
 enum LoginState {
   main,
@@ -399,6 +397,14 @@ class SignupFormState extends State<SignupForm> {
     } 
     try {
       await FirebaseFirestore.instance
+        .collection('entries')
+        .doc(uid)
+        .set({"entries": []});
+    } catch (e) {
+      return e.toString();
+    } 
+    try {
+      await FirebaseFirestore.instance
         .collection('meals')
         .doc(uid)
         .set({"meals": []});
@@ -411,6 +417,15 @@ class SignupFormState extends State<SignupForm> {
         .doc(uid)
         .set({"workouts": []});
     } catch (e) {
+      return e.toString();
+    }
+    try {
+      await FirebaseFirestore.instance
+        .collection('weights')
+        .doc(uid)
+        .set({"weights": []});
+    } catch (e) {
+      print("Error");
       return e.toString();
     } 
     return null;

@@ -3,13 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:trifit/controllers/StepController.dart';
 import 'package:trifit/models/MealModel.dart';
+import 'package:trifit/icons/scale_icon_icons.dart';
+import '../controllers/WeightController.dart';
 import '../models/StepModel.dart';
+import '../models/WeightModel.dart';
 import '../utilities/Styles.dart';
 import '../components/dropdown.dart';
 import '../components/expandableFab.dart';
 import '../controllers/MealController.dart';
 import 'package:intl/intl.dart';
-
 import '../utilities/UtilityFunctions.dart';
 
 class HomePage extends StatefulWidget {
@@ -39,99 +41,108 @@ class _HomePageState extends State<HomePage> {
   List steps = [];
   var stepController = StepController();
   var mealController = MealController();
-
+  var weightController = WeightController();
   @override
   Widget build(BuildContext context) {
-
     /*
       Using this streambuilder allows the page to wait until it has all of the necessary data
       fetched and ready to go before
     */
     return StreamBuilder(
-      stream: FirebaseFirestore.instance
-      .collection('meals')                            
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return CircularProgressIndicator();
-        } 
-        selectedMealData = mealController.getMealsForDay(selectedDate);
-        mealCards = [];
-        for (var meal in selectedMealData) {
-          mealCards.add(mealCard(meal));
-        }
-        return Scaffold(
-          body: Stack(
-            children: [
-              Column(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-                Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back_ios),
-                          onPressed: isDecrementDateButtonDisabled
-                              ? null
-                              : () {
-                                  incrementSelectedDate(-1);
-                                },
-                        ),
-                        selectedDateLabel(),
-                        IconButton(
-                          icon: Icon(Icons.arrow_forward_ios),
-                          onPressed: isIncrementDateButtonDisabled
-                              ? null
-                              : () {
-                                  incrementSelectedDate(1);
-                                },
-                        )
-                      ],
-                    )),
+        stream: FirebaseFirestore.instance
+            .collection('meals')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return CircularProgressIndicator();
+          }
+          selectedMealData = mealController.getMealsForDay(selectedDate);
+          mealCards = [];
+          for (var meal in selectedMealData) {
+            mealCards.add(mealCard(meal));
+          }
+          return Scaffold(
+            body: Stack(
+              children: [
+                Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                          padding: EdgeInsets.only(top: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.arrow_back_ios),
+                                onPressed: isDecrementDateButtonDisabled
+                                    ? null
+                                    : () {
+                                        incrementSelectedDate(-1);
+                                      },
+                              ),
+                              selectedDateLabel(),
+                              IconButton(
+                                icon: Icon(Icons.arrow_forward_ios),
+                                onPressed: isIncrementDateButtonDisabled
+                                    ? null
+                                    : () {
+                                        incrementSelectedDate(1);
+                                      },
+                              )
+                            ],
+                          )),
 
-                // Calorie summary card
-                isLoading
-                    ? SizedBox(height: 0)
-                    : calorieSummary(
-                        selectedMealData), // Calorie summary if data has been fetched, loading state if not
-                Expanded(
-                    child: ListView(
-                  shrinkWrap: true,
-                  children: isLoading
-                      ? [SizedBox(height: 0)]
-                      : [
-                          ...mealCards,
-                          SizedBox(height: 140)
-                        ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
-                )),
-              ]),
-            ],
-          ),
-          floatingActionButton: ExpandableFab(
-            distance: 60.0,
-            children: [
-              ActionButton(
-                onPressed: () => showStepEntryDialog(() => {
-                      setState(() {
-                        load();
-                      })
-                    }),
-                icon: const Icon(Icons.directions_walk_outlined),
-              ),
-              ActionButton(
-                onPressed: () => showMealEntryDialog(() => {
-                      setState(() {
-                        load();
-                      })
-                    }),
-                icon: const Icon(Icons.restaurant),
-              )
-            ],
-          ),
-        );
-      }
-    );
+                      // Calorie summary card
+                      isLoading
+                          ? SizedBox(height: 0)
+                          : calorieSummary(
+                              selectedMealData), // Calorie summary if data has been fetched, loading state if not
+                      Expanded(
+                          child: ListView(
+                        shrinkWrap: true,
+                        children: isLoading
+                            ? [SizedBox(height: 0)]
+                            : [
+                                ...mealCards,
+                                SizedBox(height: 140)
+                              ], // Populate with meal cards if data has been fetched, loading state if not, and add a sizedbox to the end for whitespace
+                      )),
+                    ]),
+              ],
+            ),
+            floatingActionButton: ExpandableFab(
+              distance: 80.0,
+              children: [
+                ActionButton(
+                  onPressed: () => showStepEntryDialog(() => {
+                        setState(() {
+                          load();
+                        })
+                      }),
+                  icon: const Icon(Icons.directions_walk_outlined),
+                ),
+                ActionButton(
+                  onPressed: () => showWeightEntryDialog(() => {
+                        setState(() {
+                          load();
+                        })
+                      }),
+                  // icon: const Icon(CustomIcons.scale, size: 24),
+                  icon: const Icon(ScaleIcon.scale, size: 24),
+                ),
+                ActionButton(
+                  onPressed: () => showMealEntryDialog(() => {
+                        setState(() {
+                          load();
+                        })
+                      }),
+                  icon: const Icon(Icons.restaurant),
+                )
+              ],
+            ),
+          );
+        });
   }
 
   void showMealEntryDialog(reload) {
@@ -319,7 +330,8 @@ class _HomePageState extends State<HomePage> {
               TextButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    await stepController.addSteps(StepModel(stepTextController.text, selectedDate));
+                    await stepController.addSteps(
+                        StepModel(stepTextController.text, selectedDate));
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Successfully added steps'),
@@ -331,6 +343,76 @@ class _HomePageState extends State<HomePage> {
                   }
                 },
                 child: Text('Add'),
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  void showWeightEntryDialog(reload) {
+    final _formKey = GlobalKey<FormState>();
+
+    TextEditingController weightTextController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            title: Text('Update weight'),
+            insetPadding: EdgeInsets.zero,
+            content: Container(
+              width: 200,
+              child: SingleChildScrollView(
+                  child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 100,
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: weightTextController,
+                              decoration:
+                                  InputDecoration(hintText: "Weight (lbs)"),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Required';
+                                }
+                                if (num.tryParse(value) == null) {
+                                  return 'Must be number';
+                                }
+                                return null;
+                              },
+                            ),
+                          )
+                        ],
+                      ))),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await weightController.addWeight(
+                        WeightModel(weightTextController.text, selectedDate));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Successfully updated weight'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    reload();
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text('Update'),
               ),
             ],
           );
@@ -477,7 +559,7 @@ class _HomePageState extends State<HomePage> {
 
   load() async {
     isLoading = true;
-    
+
     setState(() {
       selectedMealData = mealController.allMeals
           .where((i) => DateTime.parse(i["date"]) == selectedDate)
