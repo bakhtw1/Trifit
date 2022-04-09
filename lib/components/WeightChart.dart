@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:trifit/controllers/WeightController.dart';
 import 'package:trifit/utilities/ColorExtentions.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:trifit/utilities/DateUtil.dart';
@@ -38,7 +42,9 @@ class WeightMetricsState extends State<WeightMetrics> {
 
   double barYExtent = 250;
 
-  List<double> weekData = [
+  WeightController weightController = WeightController();
+
+  List<double> yearData = [
     200,
     190,
     195,
@@ -94,6 +100,13 @@ class WeightMetricsState extends State<WeightMetrics> {
     });
   }
 
+  void fillYearData(int year) {
+    for (int i = 0; i < 12; i++) {
+      yearData[i] =
+          weightController.getAverageWeightForMonth(year, i + 1).toDouble();
+    }
+  }
+
   Widget DatePicker() {
     List<Widget> items = [];
 
@@ -102,9 +115,7 @@ class WeightMetricsState extends State<WeightMetrics> {
       items.add(ListTile(
         onTap: () {
           setState(() {
-            for (int i = 0; i < weekData.length; i++) {
-              weekData[i] = Random().nextInt(10).toDouble() + 170;
-            }
+            fillYearData(i);
             year = i.toString();
             refreshState();
             Navigator.of(context).pop();
@@ -125,105 +136,121 @@ class WeightMetricsState extends State<WeightMetrics> {
 
   @override
   Widget build(BuildContext context) {
-    if (year == "") {
-      year = DateTime.now().year.toString();
-    }
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('weights')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Card(
-        elevation: 10,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: cardBackgroundColor,
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text(
-                    widget.title,
-                    style: TextStyle(
-                        color: cardTitleTextColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 4,
-                  ),
-                  Text(
-                    year,
-                    style: TextStyle(
-                        color: cardSubtitleTextColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 38,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: BarChart(
-                        mainBarData(),
-                        swapAnimationDuration: animDuration,
+        if (year == "") {
+          year = DateTime.now().year.toString();
+          fillYearData(dateUtil.currentDay.year);
+        }
+
+        return AspectRatio(
+          aspectRatio: 1,
+          child: Card(
+            elevation: 10,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            color: cardBackgroundColor,
+            child: Stack(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Text(
+                        widget.title,
+                        style: TextStyle(
+                            color: cardTitleTextColor,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold),
                       ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        year,
+                        style: TextStyle(
+                            color: cardSubtitleTextColor,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(
+                        height: 38,
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: BarChart(
+                            mainBarData(),
+                            swapAnimationDuration: animDuration,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 12,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Align(
+                    alignment: Alignment.topRight,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.calendar_month,
+                        color: Color(0xff0f4a3c),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          showModalBottomSheet(
+                              context: context,
+                              builder: (context) {
+                                return StatefulBuilder(
+                                    builder: ((context, setState) {
+                                  return Container(
+                                    height: 200,
+                                    child: Column(
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.all(15.0),
+                                          child: Text(
+                                            "Select Year",
+                                            style: TextStyle(
+                                                color: cardTitleTextColor,
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        DatePicker()
+                                      ],
+                                    ),
+                                  );
+                                }));
+                              });
+                        });
+                      },
                     ),
                   ),
-                  const SizedBox(
-                    height: 12,
-                  ),
-                ],
-              ),
+                )
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.calendar_month,
-                    color: Color(0xff0f4a3c),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return StatefulBuilder(
-                                builder: ((context, setState) {
-                              return Container(
-                                height: 200,
-                                child: Column(
-                                  children: [
-                                    const Padding(
-                                      padding: EdgeInsets.all(15.0),
-                                      child: Text(
-                                        "Select Year",
-                                        style: TextStyle(
-                                            color: cardTitleTextColor,
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                    DatePicker()
-                                  ],
-                                ),
-                              );
-                            }));
-                          });
-                    });
-                  },
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -257,7 +284,7 @@ class WeightMetricsState extends State<WeightMetrics> {
   }
 
   List<BarChartGroupData> showingGroups() => List.generate(12, (i) {
-        return makeGroupData(i, weekData[i], isTouched: i == touchedIndex);
+        return makeGroupData(i, yearData[i], isTouched: i == touchedIndex);
       });
 
   BarChartData mainBarData() {

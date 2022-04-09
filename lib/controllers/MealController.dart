@@ -6,18 +6,19 @@ import '../utilities/UtilityFunctions.dart';
 
 class MealController {
   var allMeals = [];
-  late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> mealSubscription;
+  late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>
+      mealSubscription;
 
   MealController() {
-      mealSubscription = FirebaseFirestore.instance
-      .collection('meals')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .snapshots()
-      .listen((snapshot) {
-        var data = snapshot.data();
-        if (data != null) {
-          allMeals = data['meals'];
-        }
+    mealSubscription = FirebaseFirestore.instance
+        .collection('meals')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .snapshots()
+        .listen((snapshot) {
+      var data = snapshot.data();
+      if (data != null) {
+        allMeals = data['meals'];
+      }
     });
   }
 
@@ -25,7 +26,8 @@ class MealController {
   getMealsForPastDays(int days) {
     var filteredMeals = [];
     for (int i = 0; i <= days; i++) {
-      filteredMeals.addAll(getMealsForDay(simpleDate(DateTime.now()).subtract(Duration(days: i))));
+      filteredMeals.addAll(getMealsForDay(
+          simpleDate(DateTime.now()).subtract(Duration(days: i))));
     }
     return filteredMeals;
   }
@@ -37,22 +39,23 @@ class MealController {
 
   addMeal(MealModel toAdd, DateTime date) async {
     FirebaseFirestore.instance
-      .collection('meals')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .update({
-        "meals": FieldValue.arrayUnion([toAdd.toJson()])
-      });
+        .collection('meals')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({
+      "meals": FieldValue.arrayUnion([toAdd.toJson()])
+    });
   }
 
   // Returns the total calorie intake from meals on a given date as an int
   int calorieIntakeForDate(DateTime date) {
-    var selectedMealData = allMeals
-      .where((i) => DateTime.parse(i["date"]) == date)
-      .toList();
+    var selectedMealData =
+        allMeals.where((i) => DateTime.parse(i["date"]) == date).toList();
+
     int cals = 0;
     for (var meal in selectedMealData) {
       cals += meal["calories"] as int;
     }
+
     return cals;
   }
 }

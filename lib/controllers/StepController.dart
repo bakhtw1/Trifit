@@ -8,18 +8,21 @@ import '../utilities/UtilityFunctions.dart';
 class StepController {
   var allSteps = [];
 
-  late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>> stepSubscription;
+  late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>
+      stepSubscription;
 
   StepController() {
     stepSubscription = FirebaseFirestore.instance
-      .collection('exercise')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .snapshots()
-      .listen((snapshot) {
-        var data = snapshot.data();
-        if (data != null) {
-          allSteps = (data['workouts'] as List<dynamic>).where((i) => i['type'] == 'steps').toList();
-        }
+        .collection('exercise')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .snapshots()
+        .listen((snapshot) {
+      var data = snapshot.data();
+      if (data != null) {
+        allSteps = (data['workouts'] as List<dynamic>)
+            .where((i) => i['type'] == 'steps')
+            .toList();
+      }
     });
   }
 
@@ -27,22 +30,26 @@ class StepController {
   getStepsForPastDays(int days) {
     var filteredSteps = [];
     for (int i = 0; i <= days; i++) {
-      filteredSteps.addAll(_getStepsForDay(simpleDate(DateTime.now()).subtract(Duration(days: i))));
+      filteredSteps.addAll(_getStepsForDay(
+          simpleDate(DateTime.now()).subtract(Duration(days: i))));
     }
     return filteredSteps;
   }
 
   // Returns an integer value of the active calories for a given date
-  getActiveCaloriesForDate(DateTime date) {
-    return (getStepsForDate(date)*0.04).ceil();
+  int getActiveCaloriesForDate(DateTime date) {
+    return (getStepsForDate(date) * 0.04).ceil();
   }
 
   // Returns an integer value for the number of steps on a given date
   getStepsForDate(DateTime date) {
-    var stepCount = 0.0;
+    int stepCount = 0;
     for (var step in _getStepsForDay(date)) {
-      try { stepCount += step['workout']['steps'];}
-      catch(e) { stepCount += 0; }
+      try {
+        stepCount += step['workout']['steps'] as int;
+      } catch (e) {
+        stepCount += 0;
+      }
     }
     return stepCount;
   }
@@ -53,12 +60,14 @@ class StepController {
   }
 
   addSteps(StepModel toAdd) async {
-    var exercise = ExerciseModel("steps", toAdd, toAdd.calories.toDouble(), toAdd.date);
+    var exercise =
+        ExerciseModel("steps", toAdd, toAdd.calories.toDouble(), toAdd.date);
     allSteps.add(toAdd.toJson());
     FirebaseFirestore.instance
-      .collection('exercise')
-      .doc(FirebaseAuth.instance.currentUser!.uid)
-      .update({"workouts":FieldValue.arrayUnion([exercise.toJson()])});
+        .collection('exercise')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({
+      "workouts": FieldValue.arrayUnion([exercise.toJson()])
+    });
   }
-
 }
