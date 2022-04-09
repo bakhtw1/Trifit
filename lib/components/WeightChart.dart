@@ -103,7 +103,7 @@ class WeightMetricsState extends State<WeightMetrics> {
   void fillYearData(int year) {
     for (int i = 0; i < 12; i++) {
       yearData[i] =
-          weightController.getAverageWeightForMonth(year, i).toDouble();
+          weightController.getAverageWeightForMonth(year, i + 1).toDouble();
     }
   }
 
