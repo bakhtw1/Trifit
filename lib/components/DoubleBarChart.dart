@@ -90,7 +90,6 @@ class DoubleBarChartWeeklyDataState extends State<DoubleBarChartWeeklyData> {
   int touchedIndex = -1;
 
   void fillWeekData(DateTime selectedSunday) {
-    print(selectedSunday.toString());
     for (int i = 0; i < 7; i++) {
       calIn[i] = mealController
           .calorieIntakeForDate(selectedSunday.add(Duration(days: i)))

@@ -49,7 +49,6 @@ class StepController {
         stepCount += step['workout']['steps'] as int;
       } catch (e) {
         stepCount += 0;
-        print(e);
       }
     }
     return stepCount;
