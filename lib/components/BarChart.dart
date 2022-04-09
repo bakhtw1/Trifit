@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:trifit/utilities/ColorExtentions.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:trifit/utilities/DateUtil.dart';
+import 'package:trifit/controllers/StepController.dart';
 
 class WeeklyDataBarChart extends StatefulWidget {
   final List<Color> availableColors = const [
@@ -40,8 +43,10 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
   static const Color barLabelTextColor = Colors.black;
 
   double barYExtent = 10000;
+  StepController stepController = StepController();
+  DateUtil dateUtil = DateUtil();
 
-  List<double> weekData = [
+  List<int> weekData = [
     0,
     0,
     0,
@@ -50,8 +55,6 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
     0,
     0,
   ];
-
-  DateUtil dateUtil = DateUtil();
 
   List<String> daysOfWeek = [
     "Sunday",
@@ -70,144 +73,160 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
   final Duration animDuration = const Duration(milliseconds: 250);
   int touchedIndex = -1;
 
+  void fillWeekData(DateTime selectedSunday) {
+    for (int i = 0; i < 7; i++) {
+      weekData[i] =
+          stepController.getStepsForDate(selectedSunday.add(Duration(days: i)));
+    }
+  }
+
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       dateRange = dateUtil.getWeekRange(args.value);
-      for (int i = 0; i < weekData.length; i++) {
-        weekData[i] = Random().nextInt(widget.yExtents.toInt()).toDouble() + 6;
-      }
+      fillWeekData(args.value);
       refreshState();
     });
   }
 
-  Widget DatePicker() {
-    return Container(
-      child: SfDateRangePicker(
-          onSelectionChanged: _onSelectionChanged,
-          monthViewSettings: const DateRangePickerMonthViewSettings(
-              showTrailingAndLeadingDates: true),
-          allowViewNavigation: true,
-          view: DateRangePickerView.month,
-          maxDate: dateUtil.getCurrentSaturday(),
-          selectionMode: DateRangePickerSelectionMode.single,
-          selectableDayPredicate: (DateTime dateTime) {
-            if (dateTime.weekday == 7) {
-              return true;
-            }
-            return false;
-          },
-          initialSelectedRange: PickerDateRange(
-            dateUtil.getCurrentSunday(),
-            dateUtil.getCurrentSaturday(),
-          )),
-    );
+  Widget _datePicker() {
+    return SfDateRangePicker(
+        onSelectionChanged: _onSelectionChanged,
+        monthViewSettings: const DateRangePickerMonthViewSettings(
+            showTrailingAndLeadingDates: true),
+        allowViewNavigation: true,
+        view: DateRangePickerView.month,
+        maxDate: dateUtil.getCurrentSaturday(),
+        selectionMode: DateRangePickerSelectionMode.single,
+        selectableDayPredicate: (DateTime dateTime) {
+          if (dateTime.weekday == 7) {
+            return true;
+          }
+          return false;
+        },
+        initialSelectedRange: PickerDateRange(
+          dateUtil.getCurrentSunday(),
+          dateUtil.getCurrentSaturday(),
+        ));
   }
 
   @override
   Widget build(BuildContext context) {
-    if (dateRange == "") {
-      dateRange = dateUtil.getWeekRange(DateTime.now());
-      for (int i = 0; i < weekData.length; i++) {
-        weekData[i] = Random().nextDouble() * widget.yExtents;
-      }
-    }
+    return StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('exercise')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Card(
-        elevation: 10,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        color: cardBackgroundColor,
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.max,
+          if (dateRange == "") {
+            dateRange = dateUtil.getWeekRange(DateTime.now());
+            fillWeekData(dateUtil.getCurrentSunday());
+          }
+
+          return AspectRatio(
+            aspectRatio: 1,
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
+              color: cardBackgroundColor,
+              child: Stack(
                 children: <Widget>[
-                  Text(
-                    widget.title,
-                    style: TextStyle(
-                        color: cardTitleTextColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 4,
-                  ),
-                  Text(
-                    dateRange,
-                    style: TextStyle(
-                        color: cardSubtitleTextColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(
-                    height: 38,
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: BarChart(
-                        mainBarData(),
-                        swapAnimationDuration: animDuration,
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                              color: cardTitleTextColor,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 4,
+                        ),
+                        Text(
+                          dateRange,
+                          style: const TextStyle(
+                              color: cardSubtitleTextColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(
+                          height: 38,
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: BarChart(
+                              mainBarData(),
+                              swapAnimationDuration: animDuration,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 12,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(
-                    height: 12,
-                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.calendar_month,
+                          color: Color(0xff0f4a3c),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return StatefulBuilder(
+                                      builder: ((context, setState) {
+                                    return Column(
+                                      children: [
+                                        const Padding(
+                                          padding: EdgeInsets.all(15.0),
+                                          child: Text(
+                                            "Select Week",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                color: cardTitleTextColor,
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(15.0),
+                                          child: _datePicker(),
+                                        )
+                                      ],
+                                    );
+                                  }));
+                                });
+                          });
+                        },
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.calendar_month,
-                    color: const Color(0xff0f4a3c),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return StatefulBuilder(
-                                builder: ((context, setState) {
-                              return Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Text(
-                                      "Select Week",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: cardTitleTextColor,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: DatePicker(),
-                                  )
-                                ],
-                              );
-                            }));
-                          });
-                    });
-                  },
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   BarChartGroupData makeGroupData(
@@ -240,7 +259,8 @@ class WeeklyDataBarChartState extends State<WeeklyDataBarChart> {
   }
 
   List<BarChartGroupData> showingGroups() => List.generate(7, (i) {
-        return makeGroupData(i, weekData[i], isTouched: i == touchedIndex);
+        return makeGroupData(i, weekData[i].toDouble(),
+            isTouched: i == touchedIndex);
       });
 
   BarChartData mainBarData() {
