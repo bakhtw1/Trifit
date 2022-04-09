@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AddFeedItem extends StatefulWidget {
-  const AddFeedItem({Key? key}) : super(key: key);
+  AddFeedItem({Key? key}) : super(key: key);
 
   @override
   State<AddFeedItem> createState() => _AddFeedItemState();
@@ -9,6 +11,8 @@ class AddFeedItem extends StatefulWidget {
 
 class _AddFeedItemState extends State<AddFeedItem> {
   final myController = TextEditingController();
+
+  CollectionReference feed = FirebaseFirestore.instance.collection("feed");
 
   @override
   void initState() {
@@ -58,6 +62,15 @@ class _AddFeedItemState extends State<AddFeedItem> {
               ),
               controller: myController,
             ),
+            ElevatedButton(
+                onPressed: () async {
+                  await feed.add({
+                    'name': 'ananya',
+                    'age': 23,
+                    'note': 'test feed'
+                  }).then((value) => print('feed added'));
+                },
+                child: Text('Share'))
           ],
         ),
       ),
