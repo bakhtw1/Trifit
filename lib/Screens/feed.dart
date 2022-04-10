@@ -22,6 +22,7 @@ class Feed extends StatefulWidget {
 class _FeedState extends State<Feed> {
   String text = "initial";
   late TextEditingController c;
+  FeedController feedController = FeedController();
 
   @override
   initState() {
@@ -30,21 +31,19 @@ class _FeedState extends State<Feed> {
   }
 
   var feedConroller = FeedController();
+  late Future<dynamic> feedData;
+
   final Stream<QuerySnapshot> users =
       FirebaseFirestore.instance.collection('feeds').snapshots();
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Object>(
-        stream: FirebaseFirestore.instance
-            .collection('feeds')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection('feeds').snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return CircularProgressIndicator();
           }
-
           return Scaffold(
             // body: ListView.builder(
             //     itemCount: posts.length,
@@ -58,27 +57,47 @@ class _FeedState extends State<Feed> {
             //       );
             //     }),
 
-            body: StreamBuilder<QuerySnapshot>(
-              stream: users,
-              builder: (
-                BuildContext context,
-                AsyncSnapshot<QuerySnapshot> snapshot,
-              ) {
-                if (snapshot.hasError) {
-                  return Text('something went wrong');
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text('Loading');
-                }
+            // body: StreamBuilder<QuerySnapshot>(
+            //   stream: users,
+            //   builder: (
+            //     BuildContext context,
+            //     AsyncSnapshot<QuerySnapshot> snapshot,
+            //   ) {
+            //     if (snapshot.hasError) {
+            //       return Text('something went wrong');
+            //     }
+            //     if (snapshot.connectionState == ConnectionState.waiting) {
+            //       return Text('Loading');
+            //     }
 
-                final data = snapshot.requireData;
-                return ListView.builder(
-                    itemCount: data.size,
-                    itemBuilder: (context, index) {
-                      return Text(data.docs[index]['desc']);
-                    });
-              },
-            ),
+            //     //final data = snapshot.requireData;
+            //     return ListView.builder(
+            //         itemCount: feedData.length,
+            //         itemBuilder: (context, index) {
+            //           feedConroller.getAllFeeds();
+            //           //print(feedData[index]);
+            //           return Text("Test"); //data.docs[index].data()['desc']);
+            //         });
+            //   },
+            // ),
+
+            body: FutureBuilder(
+                future: feedConroller.getAllFeeds(),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    return ListView.builder(
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (context, index) {
+                          print(snapshot.data[index]["desc"]);
+                          if (snapshot.data[index]["desc"] != null) {
+                            return Text(snapshot.data[index]["desc"]);
+                          }
+                          return Text("Nothing to see here");
+                        });
+                  }
+                }),
             floatingActionButton: FloatingActionButton(
               backgroundColor: tfstyle.trifitColor[700],
               onPressed: () {

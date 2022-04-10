@@ -1,6 +1,8 @@
 import 'package:trifit/Screens/feed.dart';
 
 class FeedModel {
+  late final String profileImageURL;
+  late final String uid;
   late final String desc;
   late final String img;
 
@@ -14,6 +16,11 @@ class FeedModel {
   // }
 
   Map<String, dynamic> toJson() {
-    return {'desc': desc, 'img': img};
+    return {
+      'desc': desc,
+      'img': img,
+      'uid': uid,
+      'profileImageUrl': profileImageURL
+    };
   }
 }

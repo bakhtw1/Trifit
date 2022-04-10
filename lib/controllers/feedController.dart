@@ -23,6 +23,20 @@ class FeedController {
     });
   }
 
+  getAllFeeds() async {
+    allFeeds = [];
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('feeds').get();
+    // Get data from docs and convert map to List
+    List<dynamic> mapped = querySnapshot.docs.map((doc) => doc.data()).toList();
+    for (var list in mapped) {
+      if (list["feeds"] != null) {
+        allFeeds.addAll(list["feeds"]);
+      }
+    }
+    return allFeeds;
+  }
+
   addFeed(FeedModel toAdd) async {
     FirebaseFirestore.instance
         .collection('feeds')
