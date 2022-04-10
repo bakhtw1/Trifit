@@ -22,7 +22,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseFirestore.instance
-          .collection('profile')
+          .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .snapshots(),
       builder: (context, snapshot) {
@@ -72,7 +72,9 @@ class _ProfileState extends State<Profile> {
                             MaterialPageRoute(
                               builder: (context) => FriendList(
                                 title: "Following",
-                                friends: profileData["following"],
+                                isFollowingScreen: true,
+                                followingList: profileData["following"],
+                                followersList: profileData["followers"],
                               ),
                             ),
                           );
@@ -87,7 +89,9 @@ class _ProfileState extends State<Profile> {
                             MaterialPageRoute(
                               builder: (context) => FriendList(
                                 title: "Followers",
-                                friends: profileData["followers"],
+                                isFollowingScreen: false,
+                                followingList: profileData["following"],
+                                followersList: profileData["followers"],
                               ),
                             ),
                           );

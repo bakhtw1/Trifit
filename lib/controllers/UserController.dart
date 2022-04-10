@@ -5,6 +5,7 @@ import '../models/ProfileModel.dart';
 
 class UserController {
   var user;
+  var followingIds;
   late StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>
       userSubscription;
 
@@ -32,10 +33,39 @@ class UserController {
     return cleanedUser;
   }
 
-  updateUser(ProfileModel toUpdate) async {
+  updateUser(ProfileModel toUpdate) {
     FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .update(toUpdate.toJson());
+  }
+
+  getFollowing(followingList) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .where("uid", whereIn: followingList)
+        .snapshots();
+  }
+
+  getFollowers(followersList) {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .where("uid", whereIn: followersList)
+        .snapshots();
+  }
+
+  updateFollowing(followingList) {
+    // print(followingList);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'following': followingList});
+  }
+
+  updateFollowers(followersList) {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({'followers': followersList});
   }
 }
