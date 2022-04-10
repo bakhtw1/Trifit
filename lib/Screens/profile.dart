@@ -11,6 +11,7 @@ import '../components/friendList.dart';
 import '../controllers/UserController.dart';
 import '../controllers/StepController.dart';
 import '../controllers/WeightController.dart';
+import '../controllers/ChallengeController.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -22,6 +23,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   var userController = UserController();
   var stepController = StepController();
+  var challengeController = ChallengeController();
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -187,7 +189,7 @@ class _ProfileState extends State<Profile> {
                                     Text("Fitness Style:"),
                                     Text("Total Calories Burned:"),
                                     Text("Desired Weight:"),
-                                    Text("Challenges Completed:")
+                                    Text("Active Challenges:")
                                   ],
                                 ),
                                 Column(
@@ -201,7 +203,12 @@ class _ProfileState extends State<Profile> {
                                           .toString(),
                                     ),
                                     Text(profileData['desiredWeight']),
-                                    Text(""),
+                                    Text(
+                                      challengeController
+                                          .getAllChallenges()
+                                          .length
+                                          .toString(),
+                                    ),
                                   ],
                                 ),
                               ],
