@@ -53,6 +53,20 @@ class StepController {
     }
     return stepCount;
   }
+  
+  getStepsFromDateForPastDays(DateTime date, int days) {
+    var filteredSteps = [];
+    num steps = 0;
+    for (int i = 0; i <= days; i++) {
+      filteredSteps.addAll(_getStepsForDay(simpleDate(date).subtract(Duration(days: i))));
+    }
+    for (var step in filteredSteps) {
+      if(step["workout"]["steps"] != null) {
+        steps = steps + step["workout"]["steps"];
+      }
+    }
+    return steps;
+  }
 
   // Returns json array containing all step data for a date
   _getStepsForDay(DateTime day) {
