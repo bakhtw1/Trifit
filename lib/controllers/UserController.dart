@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/UserModel.dart';
+import '../models/ProfileModel.dart';
 
 class UserController {
   var user;
@@ -30,5 +30,12 @@ class UserController {
       }
     });
     return cleanedUser;
+  }
+
+  updateUser(ProfileModel toUpdate) async {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update(toUpdate.toJson());
   }
 }

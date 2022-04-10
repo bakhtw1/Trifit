@@ -14,8 +14,7 @@ class UserModel {
   Gender gender = Gender.unspecified;
   String? age;
   String? weight;
-  String? heightFeet;
-  String? heightInches;
+  String? height;
   String imageURL =
       "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541";
   String fitnessStyle = "default";
@@ -33,8 +32,7 @@ class UserModel {
         'gender': gender.toString().split('.').last,
         'age': age,
         'weight': weight,
-        'heightFeet': heightFeet,
-        'heightInches': heightInches,
+        'height': height,
         'imageURL': imageURL,
         'fitnessStyle': fitnessStyle,
         'desiredWeight': desiredWeight

@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:trifit/data/profile.dart';
+import '../models/ProfileModel.dart';
 import '../utilities/Styles.dart';
-import '../data/profile.dart';
 import '../components/friendList.dart';
 import '../controllers/UserController.dart';
 
@@ -33,6 +34,7 @@ class _ProfileState extends State<Profile> {
         var profileData = userController.getUser();
         var registrationDate = DateFormat('dd/MM/yyyy')
             .format(profileData['registrationDate'].toDate());
+        var height = profileData['height'];
         return Stack(
           children: [
             Container(
@@ -135,7 +137,7 @@ class _ProfileState extends State<Profile> {
                                         .toString()),
                                     Text(profileData["weight"].toString()),
                                     Text(profileData["age"].toString()),
-                                    Text(""),
+                                    Text(height),
                                     Text(registrationDate.toString()),
                                   ],
                                 ),
@@ -186,7 +188,7 @@ class _ProfileState extends State<Profile> {
                                   children: [
                                     Text(profileData['fitnessStyle']),
                                     Text(""),
-                                    Text(""),
+                                    Text(profileData['desiredWeight']),
                                     Text(""),
                                   ],
                                 ),
@@ -242,19 +244,21 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController _ageController;
   late TextEditingController _desiredWeightController;
   late TextEditingController _fitnessStyleController;
+  late TextEditingController _heightController;
+  late TextEditingController _heightInchesController;
+  var userController = UserController();
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.profile["name"]);
-    _weightController =
-        TextEditingController(text: widget.profile["weight"].toString());
-    _ageController =
-        TextEditingController(text: widget.profile["age"].toString());
+    _weightController = TextEditingController(text: widget.profile["weight"]);
+    _ageController = TextEditingController(text: widget.profile["age"]);
     _desiredWeightController =
-        TextEditingController(text: widget.profile["desiredWeight"].toString());
+        TextEditingController(text: widget.profile["desiredWeight"]);
     _fitnessStyleController =
         TextEditingController(text: widget.profile["fitnessStyle"]);
+    _heightController = TextEditingController(text: widget.profile["height"]);
   }
 
   @override
@@ -268,6 +272,7 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
+    String gender = widget.profile["gender"];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
@@ -321,7 +326,43 @@ class _EditProfileState extends State<EditProfile> {
                 });
               },
             ),
+            TextField(
+              controller: _heightController,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Height (feet)',
+              ),
+              onChanged: (String value) {
+                setState(() {
+                  widget.profile["height"] = value;
+                });
+              },
+            ),
             const SizedBox(height: 10),
+            DropdownButton<String>(
+              value: widget.profile["gender"],
+              icon: const Icon(Icons.arrow_drop_down),
+              isExpanded: true,
+              elevation: 16,
+              // style: const TextStyle(color: Colors.deepPurple),
+              underline: Container(
+                height: 2,
+                color: Colors.grey,
+                padding: const EdgeInsets.only(top: 100),
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  widget.profile["gender"] = newValue!;
+                });
+              },
+              items: <String>['male', 'female', 'unspecified']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
             TextField(
               controller: _ageController,
               decoration: const InputDecoration(
@@ -330,7 +371,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               onChanged: (String value) {
                 setState(() {
-                  widget.profile["Age"] = value;
+                  widget.profile["age"] = value;
                 });
               },
             ),
@@ -360,7 +401,7 @@ class _EditProfileState extends State<EditProfile> {
                 });
               },
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -390,7 +431,18 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      await userController.updateUser(
+                        ProfileModel(
+                          widget.profile["name"],
+                          widget.profile["weight"],
+                          widget.profile["age"],
+                          widget.profile["desiredWeight"],
+                          widget.profile["fitnessStyle"],
+                          widget.profile['height'],
+                          widget.profile['gender'],
+                        ),
+                      );
                       Navigator.of(context).pop(widget.profile);
                     },
                     child: const Text('Save'),
