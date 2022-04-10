@@ -40,7 +40,20 @@ class _ChallengesState extends State<Challenges> {
 
         var allChallenges = challengeController.getAllChallenges();
         for(var challenge in allChallenges) { 
+          //calculate progress for progress bar
           challenge["stepProgress"] = stepController.getStepsFromDateForPastDays(DateTime.parse(challenge["end"]), challenge["duration"]) / challenge["amount"];
+          if(challenge["stepProgress"] < 1 && DateTime.now().isAfter(DateTime.parse(challenge["end"]))) {
+            //failed
+            challenge["status"] = "Failed";
+          }
+          else if(challenge["stepProgress"] >= 1 ) {
+            //successful
+            challenge["status"] = "Completed";
+          }
+          else {
+            //in progress
+            challenge["status"] = "Active";
+          }
         }
 
         return Scaffold(
@@ -187,20 +200,17 @@ class _ChallengesState extends State<Challenges> {
                 children: [
                   Padding(
                     padding: EdgeInsets.only(left: 5, top: 5, bottom: 5),
-                    child: Icon(
-                      getIcon(challengeData["type"]),
-                      size: 40,
-                    ),
+                    child: getIcon(challengeData["status"]),
                   ),
                   Expanded(child: Container()),
                   Column(
                     children: [
-                      Text(challengeData["type"] + " " + challengeData["amount"].toString() + " in " + challengeData["duration"].toString() + " days",
+                      Text(challengeData["type"] + " " + challengeData["amount"].toString() + " steps in " + challengeData["duration"].toString() + " days",
                           style: TextStyle(fontSize: 15)),
                       Container(
                         height: 2,
                       ),
-                      Text(challengeData["type"] + " " + challengeData["amount"].toString() + " in " + challengeData["duration"].toString() + " days",
+                      Text((challengeData["status"] == "Active")? timeRemaining(challengeData["end"]) + " remaining" : challengeData["status"],
                           style: TextStyle(fontSize: 15)),
                       Container(
                         height: 2,
@@ -214,13 +224,36 @@ class _ChallengesState extends State<Challenges> {
         ),
       );
 
-  IconData getIcon(String icon) {
-    if (icon == "Walk") {
-      return Icons.directions_walk;
-    } else if (icon == "Run") {
-      return Icons.directions_run;
+  String timeRemaining(String date) {
+    var diff = DateTime.parse(date).difference(DateTime.now());
+
+    if(diff.inDays >= 1) {
+      return diff.inDays.toString() + " days";
+    }
+    else {
+      return diff.inHours.toString() + " hours";
+    }
+  }
+
+  Icon getIcon(String icon) {
+    if (icon == "Active") {
+      return Icon(
+        Icons.directions_walk,
+        color: Colors.black,
+        size: 40,
+      );
+    } else if (icon == "Completed") {
+      return Icon(
+        Icons.check,
+        color: Colors.green,
+        size: 40,
+      );
     } else {
-      return Icons.directions_bike;
+      return Icon(
+        Icons.close,
+        color: Colors.red,
+        size: 40,
+      );
     }
   }
 
