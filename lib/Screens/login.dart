@@ -106,7 +106,6 @@ class LoginScreenState extends State<LoginScreen> {
                     const LoginForm()
                   else if (loginState == LoginState.signup)
                     const SignupForm()
-                  // const LoginForm()
                 ],
               ),
             ),

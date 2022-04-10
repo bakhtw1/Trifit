@@ -55,7 +55,6 @@ class UserController {
   }
 
   updateFollowing(followingList) {
-    // print(followingList);
     FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid)
