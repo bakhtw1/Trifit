@@ -1,7 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utilities/Styles.dart';
 import '../data/profile.dart';
 import '../components/friendList.dart';
+import '../controllers/UserController.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -11,189 +16,213 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  var userController = UserController();
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
-          margin: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 75,
-                backgroundImage: NetworkImage(
-                  profileData["imageUrl"],
-                ),
-              ),
-              const SizedBox(height: 30),
-              Text(
-                profileData["name"],
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('profile')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        var profileData = userController.getUser();
+        var registrationDate = DateFormat('dd/MM/yyyy')
+            .format(profileData['registrationDate'].toDate());
+        return Stack(
+          children: [
+            Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
+              margin: const EdgeInsets.all(8),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    child: Text("Following: ${profileData["numFollowing"]} | "),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FriendList(
-                            title: "Following",
-                            friends: profileData["following"],
-                          ),
-                        ),
-                      );
-                    },
+                  CircleAvatar(
+                    radius: 75,
+                    backgroundImage: NetworkImage(
+                      profileData["imageURL"],
+                    ),
                   ),
-                  GestureDetector(
-                    child: Text("Followers: ${profileData["numFollowers"]}"),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FriendList(
-                            title: "Followers",
-                            friends: profileData["followers"],
+                  const SizedBox(height: 30),
+                  Text(
+                    profileData["name"],
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        child: Text(
+                            "Following: ${profileData["following"].length} | "),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FriendList(
+                                title: "Following",
+                                friends: profileData["following"],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      GestureDetector(
+                        child: Text(
+                            "Followers: ${profileData["followers"].length}"),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FriendList(
+                                title: "Followers",
+                                friends: profileData["followers"],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Personal Info",
+                              style: TextStyle(fontSize: 26)),
+                          const SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              bottom: 10,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: const [
+                                    Text("Gender:"),
+                                    Text("Weight(lb):"),
+                                    Text("Age:"),
+                                    Text("Height:"),
+                                    Text("Date Joined:")
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(toBeginningOfSentenceCase(
+                                            profileData["gender"])
+                                        .toString()),
+                                    Text(profileData["weight"].toString()),
+                                    Text(profileData["age"].toString()),
+                                    Text(""),
+                                    Text(registrationDate.toString()),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Fitness Info",
+                            style: TextStyle(fontSize: 26),
                           ),
-                        ),
-                      );
-                    },
+                          const SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              bottom: 10,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: const [
+                                    Text("Fitness Style:"),
+                                    Text("Total Calories Burned:"),
+                                    Text("Desired Weight:"),
+                                    Text("Challenges Completed:")
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(profileData['fitnessStyle']),
+                                    Text(""),
+                                    Text(""),
+                                    Text(""),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Personal Info",
-                          style: TextStyle(fontSize: 26)),
-                      const SizedBox(height: 5),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 10,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text("Gender:"),
-                                Text("Weight(lb):"),
-                                Text("Age:"),
-                                Text("Height:"),
-                                Text("Date Joined:")
-                              ],
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(profileData["gender"]),
-                                Text(profileData["weight"].toString()),
-                                Text(profileData["age"].toString()),
-                                Text(profileData["height"]),
-                                Text(profileData["dateJoined"]),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: FloatingActionButton(
+                backgroundColor: trifitColor[700],
+                onPressed: () async {
+                  final profile = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfile(profile: profileData),
+                    ),
+                  );
+                  setState(() {
+                    profileData = profile;
+                  });
+                },
+                tooltip: 'Edit',
+                child: const Icon(Icons.edit),
               ),
-              const SizedBox(height: 10),
-              Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Fitness Info",
-                        style: TextStyle(fontSize: 26),
-                      ),
-                      const SizedBox(height: 5),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 10,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text("Fitness Style:"),
-                                Text("Total Calories Burned:"),
-                                Text("Desired Weight:"),
-                                Text("Challenges Completed:")
-                              ],
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(profileData["fitnessStyle"]),
-                                Text(profileData["caloriesBurned"].toString()),
-                                Text(profileData["desiredWeight"].toString()),
-                                Text(profileData["challengesCompleted"]
-                                    .toString()),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          bottom: 10,
-          right: 10,
-          child: FloatingActionButton(
-            backgroundColor: trifitColor[700],
-            onPressed: () async {
-              final profile = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditProfile(profile: profileData),
-                ),
-              );
-              setState(() {
-                profileData = profile;
-              });
-            },
-            tooltip: 'Edit',
-            child: const Icon(Icons.edit),
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -253,7 +282,7 @@ class _EditProfileState extends State<EditProfile> {
           children: [
             CircleAvatar(
               radius: 75,
-              backgroundImage: NetworkImage(widget.profile["imageUrl"]),
+              backgroundImage: NetworkImage(widget.profile["imageURL"]),
               child: Stack(
                 children: const [
                   Align(
