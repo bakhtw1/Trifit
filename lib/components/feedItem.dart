@@ -30,7 +30,7 @@ class _FeedItemState extends State<FeedItem> {
       child: Card(
         elevation: 10,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        margin: EdgeInsets.all(20),
+        margin: EdgeInsets.only(left: 20, right: 20, top: 5, bottom: 5),
         child: Padding(
           padding: const EdgeInsets.all(25.0),
           child: Column(

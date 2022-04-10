@@ -40,11 +40,8 @@ class LoginScreenState extends State<LoginScreen> {
                     loginState = LoginState.main;
                   });
                 },
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  color: Colors.white,
-                  size: 24
-                ),
+                icon: const Icon(Icons.arrow_back_ios,
+                    color: Colors.white, size: 24),
               )
             : const Text(""),
       ),
@@ -154,11 +151,11 @@ class LoginFormState extends State<LoginForm> {
           children: [
             TextFormField(
               decoration: InputDecoration(
-                  hintText: "Email",
-                  hintStyle: const TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: loginFormColor,
-                  ),
+                hintText: "Email",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+              ),
               style: const TextStyle(color: Colors.white),
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
@@ -175,11 +172,11 @@ class LoginFormState extends State<LoginForm> {
               controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                  hintText: "Password",
-                  hintStyle: const TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: loginFormColor,
-                  ),
+                hintText: "Password",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+              ),
               style: const TextStyle(color: Colors.white),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -212,7 +209,8 @@ class LoginFormState extends State<LoginForm> {
                             content: Container(
                               height: 20,
                               child: Center(
-                                child: Text("Failed to sign in: " + authErrorToString(e)),
+                                child: Text("Failed to sign in: " +
+                                    authErrorToString(e)),
                               ),
                             ),
                             backgroundColor: trifitColor[900],
@@ -230,6 +228,7 @@ class LoginFormState extends State<LoginForm> {
       ),
     );
   }
+
   String authErrorToString(FirebaseAuthException e) {
     if (e.code == "user-not-found") {
       return "User not found";
@@ -275,11 +274,11 @@ class SignupFormState extends State<SignupForm> {
           children: [
             TextFormField(
               decoration: InputDecoration(
-                  hintText: "Name",
-                  hintStyle: const TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: loginFormColor,
-                  ),
+                hintText: "Name",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+              ),
               style: const TextStyle(color: Colors.white),
               controller: nameController,
               // The validator receives the text that the user has entered.
@@ -293,11 +292,11 @@ class SignupFormState extends State<SignupForm> {
             const SizedBox(height: 15),
             TextFormField(
               decoration: InputDecoration(
-                  hintText: "Email",
-                  hintStyle: const TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: loginFormColor,
-                  ),
+                hintText: "Email",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+              ),
               style: const TextStyle(color: Colors.white),
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
@@ -314,11 +313,12 @@ class SignupFormState extends State<SignupForm> {
               controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                  hintText: "Password",
-                  hintStyle: const TextStyle(color: Colors.white),
-                  filled: true,
-                  fillColor: loginFormColor,
-                  ),            style: const TextStyle(color: Colors.white),
+                hintText: "Password",
+                hintStyle: const TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: loginFormColor,
+              ),
+              style: const TextStyle(color: Colors.white),
               validator: (value) {
                 if (value == null || value.isEmpty || value.length < 6) {
                   return 'Password must be 6 or more characters';
@@ -337,9 +337,12 @@ class SignupFormState extends State<SignupForm> {
                           emailController.text,
                           nameController.text,
                           passwordController.text);
-      
+
                       if (error == null) {
-                        await createUserEntry(FirebaseAuth.instance.currentUser!.uid, emailController.text, nameController.text);
+                        await createUserEntry(
+                            FirebaseAuth.instance.currentUser!.uid,
+                            emailController.text,
+                            nameController.text);
                         Navigator.pop(context);
                         Navigator.push(
                           context,
@@ -353,7 +356,8 @@ class SignupFormState extends State<SignupForm> {
                             content: Container(
                               height: 20,
                               child: Center(
-                                child: Text('Failed to register user: ' + error, style: TextStyle(fontSize: 12)),
+                                child: Text('Failed to register user: ' + error,
+                                    style: TextStyle(fontSize: 12)),
                               ),
                             ),
                             backgroundColor: trifitColor[900],
@@ -383,60 +387,69 @@ class SignupFormState extends State<SignupForm> {
       return authErrorToString(e);
     }
   }
-  
-  Future<String?> createUserEntry (String uid, String email, String name) async {
+
+  Future<String?> createUserEntry(String uid, String email, String name) async {
     try {
       await FirebaseFirestore.instance
-        .collection('users')
-        // Using .doc(uid).set lets us define the document to have an ID that is the same as the uid
-        // This should make it easier to lookup user data later on
-        .doc(uid)
-        .set(UserModel(uid, name, email).toJson());
-    } catch (e) {
-      return e.toString();
-    } 
-    try {
-      await FirebaseFirestore.instance
-        .collection('entries')
-        .doc(uid)
-        .set({"entries": []});
-    } catch (e) {
-      return e.toString();
-    } 
-    try {
-      await FirebaseFirestore.instance
-        .collection('meals')
-        .doc(uid)
-        .set({"meals": []});
-    } catch (e) {
-      return e.toString();
-    } 
-    try {
-      await FirebaseFirestore.instance
-        .collection('exercise')
-        .doc(uid)
-        .set({"workouts": []});
+          .collection('users')
+          // Using .doc(uid).set lets us define the document to have an ID that is the same as the uid
+          // This should make it easier to lookup user data later on
+          .doc(uid)
+          .set(UserModel(uid, name, email).toJson());
     } catch (e) {
       return e.toString();
     }
     try {
       await FirebaseFirestore.instance
-        .collection('weights')
-        .doc(uid)
-        .set({"weights": []});
+          .collection('entries')
+          .doc(uid)
+          .set({"entries": []});
     } catch (e) {
-      print("Error");
       return e.toString();
-    } 
+    }
     try {
       await FirebaseFirestore.instance
-        .collection('challenges')
-        .doc(uid)
-        .set({"challenges": []});
+          .collection('meals')
+          .doc(uid)
+          .set({"meals": []});
+    } catch (e) {
+      return e.toString();
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('exercise')
+          .doc(uid)
+          .set({"workouts": []});
+    } catch (e) {
+      return e.toString();
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('weights')
+          .doc(uid)
+          .set({"weights": []});
     } catch (e) {
       print("Error");
       return e.toString();
-    } 
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('challenges')
+          .doc(uid)
+          .set({"challenges": []});
+    } catch (e) {
+      print("Error");
+      return e.toString();
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('feeds')
+          .doc(uid)
+          .set({"feeds": []});
+    } catch (e) {
+      print("Error");
+      return e.toString();
+    }
     return null;
   }
 
