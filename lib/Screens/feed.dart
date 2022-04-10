@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:trifit/components/addfeeditem.dart';
 import 'package:trifit/components/feedItem.dart';
+import 'package:trifit/controllers/feedController.dart';
 import '../utilities/Styles.dart' as tfstyle;
 import '../utilities/feedData.dart';
 import 'dart:io';
@@ -22,6 +24,8 @@ class _FeedState extends State<Feed> {
     super.initState();
   }
 
+  var feedConroller = FeedController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,6 +43,7 @@ class _FeedState extends State<Feed> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: tfstyle.trifitColor[700],
         onPressed: () {
+          setState(() {});
           Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => AddFeedItem()));
         },
