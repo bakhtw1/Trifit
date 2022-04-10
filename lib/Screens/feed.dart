@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:trifit/controllers/feedController.dart';
 import 'package:trifit/models/FeedModel.dart';
 import 'package:trifit/models/MealModel.dart';
+import '../controllers/UserController.dart';
 import '../utilities/Styles.dart' as tfstyle;
 import '../utilities/feedData.dart';
 import 'dart:io';
@@ -30,6 +31,7 @@ class _FeedState extends State<Feed> {
     super.initState();
   }
 
+  var userController = UserController();
   var feedConroller = FeedController();
   late Future<dynamic> feedData;
 
@@ -87,14 +89,18 @@ class _FeedState extends State<Feed> {
                   if (!snapshot.hasData) {
                     return Center(child: CircularProgressIndicator());
                   } else {
+                    if (snapshot.data.length == 0) {
+                      return Center(child: Text("Nothing to see here"));
+                    }
                     return ListView.builder(
                         itemCount: snapshot.data.length,
                         itemBuilder: (context, index) {
-                          print(snapshot.data[index]["desc"]);
-                          if (snapshot.data[index]["desc"] != null) {
-                            return Text(snapshot.data[index]["desc"]);
-                          }
-                          return Text("Nothing to see here");
+                          var data = snapshot.data[index];
+                          return FeedItem(
+                              dp: data['profileImageUrl'],
+                              name: data['name'],
+                              desc: data['desc'],
+                              img: data['img']);
                         });
                   }
                 }),

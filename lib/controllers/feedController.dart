@@ -34,6 +34,9 @@ class FeedController {
         allFeeds.addAll(list["feeds"]);
       }
     }
+    allFeeds.sort((a, b) {
+      return b["date"].compareTo(a["date"]);
+    });
     return allFeeds;
   }
 

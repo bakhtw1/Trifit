@@ -431,16 +431,16 @@ class SignupFormState extends State<SignupForm> {
     } catch (e) {
       print("Error");
       return e.toString();
-    } 
+    }
     try {
       await FirebaseFirestore.instance
-        .collection('challenges')
-        .doc(uid)
-        .set({"challenges": []});
+          .collection('challenges')
+          .doc(uid)
+          .set({"challenges": []});
     } catch (e) {
       print("Error");
       return e.toString();
-    } 
+    }
     try {
       await FirebaseFirestore.instance
           .collection('feeds')

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trifit/controllers/UserController.dart';
 import 'package:trifit/models/FeedModel.dart';
 
 import '../controllers/feedController.dart';
@@ -35,6 +36,7 @@ class _AddFeedItemState extends State<AddFeedItem> {
   }
 
   var feedController = FeedController();
+  var userController = UserController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,9 @@ class _AddFeedItemState extends State<AddFeedItem> {
           if (!snapshot.hasData) {
             return CircularProgressIndicator();
           }
+          var name = userController.user['name'];
+          var imageURL = userController.user['imageURL'];
+
           return Scaffold(
             appBar: AppBar(title: Text('Create Post')),
             body: Padding(
@@ -58,13 +63,13 @@ class _AddFeedItemState extends State<AddFeedItem> {
                     Row(
                       children: [
                         CircleAvatar(
-                            backgroundImage: NetworkImage(
-                                "https://thumbs.dreamstime.com/b/portrait-young-african-american-business-woman-black-peop-people-51712509.jpg")),
+                            backgroundImage:
+                                NetworkImage(userController.user['imageURL'])),
                         SizedBox(
                           width: 10,
                         ),
                         Text(
-                          'John Doe',
+                          userController.user['name'],
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         )
@@ -104,8 +109,12 @@ class _AddFeedItemState extends State<AddFeedItem> {
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             await feedController.addFeed(FeedModel(
-                                myController.text, imgController.text));
-
+                                name,
+                                myController.text,
+                                imgController.text,
+                                imageURL,
+                                DateTime.now()));
+                            Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                   content: Text('Successfully added post')),

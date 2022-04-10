@@ -2,11 +2,12 @@ import 'package:trifit/Screens/feed.dart';
 
 class FeedModel {
   late final String profileImageURL;
-  late final String uid;
+  late final String name;
   late final String desc;
   late final String img;
+  late final DateTime date;
 
-  FeedModel(this.desc, this.img);
+  FeedModel(this.name, this.desc, this.img, this.profileImageURL, this.date);
 
   @override
   // String toString(){
@@ -19,8 +20,9 @@ class FeedModel {
     return {
       'desc': desc,
       'img': img,
-      'uid': uid,
-      'profileImageUrl': profileImageURL
+      'name': name,
+      'profileImageUrl': profileImageURL,
+      'date': date
     };
   }
 }
