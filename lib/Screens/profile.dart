@@ -245,7 +245,7 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController _desiredWeightController;
   late TextEditingController _fitnessStyleController;
   late TextEditingController _heightController;
-  late TextEditingController _heightInchesController;
+  late TextEditingController _imageURLController;
   var userController = UserController();
 
   @override
@@ -259,6 +259,8 @@ class _EditProfileState extends State<EditProfile> {
     _fitnessStyleController =
         TextEditingController(text: widget.profile["fitnessStyle"]);
     _heightController = TextEditingController(text: widget.profile["height"]);
+    _imageURLController =
+        TextEditingController(text: widget.profile["imageURL"]);
   }
 
   @override
@@ -268,6 +270,63 @@ class _EditProfileState extends State<EditProfile> {
     _ageController.dispose();
     _desiredWeightController.dispose();
     super.dispose();
+  }
+
+  String url = "";
+  String holderURL = "";
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Update Image'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  holderURL = value;
+                });
+              },
+              controller: _imageURLController,
+              decoration: const InputDecoration(hintText: "URL"),
+            ),
+            actions: <Widget>[
+              OutlinedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+              OutlinedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                  backgroundColor: MaterialStateProperty.all(trifitColor[900]),
+                ),
+                onPressed: () {
+                  setState(() {
+                    widget.profile["imageURL"] = holderURL;
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -289,12 +348,18 @@ class _EditProfileState extends State<EditProfile> {
               radius: 75,
               backgroundImage: NetworkImage(widget.profile["imageURL"]),
               child: Stack(
-                children: const [
+                children: [
                   Align(
                     alignment: Alignment.bottomRight,
                     child: CircleAvatar(
                       radius: 20,
-                      child: Icon(Icons.edit),
+                      child: IconButton(
+                        icon: const Icon(Icons.edit),
+                        tooltip: 'Update Profile Picture',
+                        onPressed: () {
+                          _displayTextInputDialog(context);
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -441,6 +506,7 @@ class _EditProfileState extends State<EditProfile> {
                           widget.profile["fitnessStyle"],
                           widget.profile['height'],
                           widget.profile['gender'],
+                          widget.profile['imageURL'],
                         ),
                       );
                       Navigator.of(context).pop(widget.profile);

@@ -6,6 +6,7 @@ class ProfileModel {
   late final String fitnessStyle;
   late final String height;
   late final String gender;
+  late final String imageURL;
 
   ProfileModel(
     this.name,
@@ -15,6 +16,7 @@ class ProfileModel {
     this.fitnessStyle,
     this.height,
     this.gender,
+    this.imageURL,
   );
 
   Map<String, dynamic> toJson() {
@@ -26,6 +28,7 @@ class ProfileModel {
       'fitnessStyle': fitnessStyle,
       'height': height,
       'gender': gender,
+      'imageURL': imageURL,
     };
   }
 }
