@@ -1,7 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:trifit/data/profile.dart';
+import '../models/WeightModel.dart';
+import '../models/ProfileModel.dart';
 import '../utilities/Styles.dart';
-import '../data/profile.dart';
 import '../components/friendList.dart';
+import '../controllers/UserController.dart';
+import '../controllers/StepController.dart';
+import '../controllers/WeightController.dart';
+import '../controllers/ChallengeController.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -11,189 +21,229 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  var userController = UserController();
+  var stepController = StepController();
+  var challengeController = ChallengeController();
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
-          margin: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 75,
-                backgroundImage: NetworkImage(
-                  profileData["imageUrl"],
-                ),
-              ),
-              const SizedBox(height: 30),
-              Text(
-                profileData["name"],
-                style: const TextStyle(
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        var profileData = userController.getUser();
+        var registrationDate = DateFormat('dd/MM/yyyy')
+            .format(profileData['registrationDate'].toDate());
+        var height = profileData['height'];
+        return Stack(
+          children: [
+            Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
+              margin: const EdgeInsets.all(8),
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    child: Text("Following: ${profileData["numFollowing"]} | "),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FriendList(
-                            title: "Following",
-                            friends: profileData["following"],
-                          ),
-                        ),
-                      );
-                    },
+                  CircleAvatar(
+                    radius: 75,
+                    backgroundImage: NetworkImage(
+                      profileData["imageURL"],
+                    ),
                   ),
-                  GestureDetector(
-                    child: Text("Followers: ${profileData["numFollowers"]}"),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FriendList(
-                            title: "Followers",
-                            friends: profileData["followers"],
+                  const SizedBox(height: 30),
+                  Text(
+                    profileData["name"],
+                    style: const TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        child: Text(
+                            "Following: ${profileData["following"].length} | "),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FriendList(
+                                title: "Following",
+                                isFollowingScreen: true,
+                                followingList: profileData["following"],
+                                followersList: profileData["followers"],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      GestureDetector(
+                        child: Text(
+                            "Followers: ${profileData["followers"].length}"),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FriendList(
+                                title: "Followers",
+                                isFollowingScreen: false,
+                                followingList: profileData["following"],
+                                followersList: profileData["followers"],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Personal Info",
+                              style: TextStyle(fontSize: 26)),
+                          const SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              bottom: 10,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: const [
+                                    Text("Gender:"),
+                                    Text("Weight(lb):"),
+                                    Text("Age:"),
+                                    Text("Height:"),
+                                    Text("Date Joined:")
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(toBeginningOfSentenceCase(
+                                            profileData["gender"])
+                                        .toString()),
+                                    Text(profileData["weight"].toString()),
+                                    Text(profileData["age"].toString()),
+                                    Text(height),
+                                    Text(registrationDate.toString()),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Card(
+                    elevation: 10,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Fitness Info",
+                            style: TextStyle(fontSize: 26),
                           ),
-                        ),
-                      );
-                    },
+                          const SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: 20,
+                              right: 20,
+                              bottom: 10,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: const [
+                                    Text("Fitness Style:"),
+                                    Text("Total Calories Burned:"),
+                                    Text("Desired Weight:"),
+                                    Text("Active Challenges:")
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(profileData['fitnessStyle']),
+                                    Text(
+                                      stepController
+                                          .getAllCaloriesBurned()
+                                          .toString(),
+                                    ),
+                                    Text(profileData['desiredWeight']),
+                                    Text(
+                                      challengeController
+                                          .getAllChallenges()
+                                          .length
+                                          .toString(),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Personal Info",
-                          style: TextStyle(fontSize: 26)),
-                      const SizedBox(height: 5),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 10,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text("Gender:"),
-                                Text("Weight(lb):"),
-                                Text("Age:"),
-                                Text("Height:"),
-                                Text("Date Joined:")
-                              ],
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(profileData["gender"]),
-                                Text(profileData["weight"].toString()),
-                                Text(profileData["age"].toString()),
-                                Text(profileData["height"]),
-                                Text(profileData["dateJoined"]),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: FloatingActionButton(
+                backgroundColor: trifitColor[700],
+                onPressed: () async {
+                  final profile = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditProfile(profile: profileData),
+                    ),
+                  );
+                  setState(() {
+                    profileData = profile;
+                  });
+                },
+                tooltip: 'Edit',
+                child: const Icon(Icons.edit),
               ),
-              const SizedBox(height: 10),
-              Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
-                child: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Fitness Info",
-                        style: TextStyle(fontSize: 26),
-                      ),
-                      const SizedBox(height: 5),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 10,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: const [
-                                Text("Fitness Style:"),
-                                Text("Total Calories Burned:"),
-                                Text("Desired Weight:"),
-                                Text("Challenges Completed:")
-                              ],
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(profileData["fitnessStyle"]),
-                                Text(profileData["caloriesBurned"].toString()),
-                                Text(profileData["desiredWeight"].toString()),
-                                Text(profileData["challengesCompleted"]
-                                    .toString()),
-                              ],
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          bottom: 10,
-          right: 10,
-          child: FloatingActionButton(
-            backgroundColor: trifitColor[700],
-            onPressed: () async {
-              final profile = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EditProfile(profile: profileData),
-                ),
-              );
-              setState(() {
-                profileData = profile;
-              });
-            },
-            tooltip: 'Edit',
-            child: const Icon(Icons.edit),
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -213,19 +263,25 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController _ageController;
   late TextEditingController _desiredWeightController;
   late TextEditingController _fitnessStyleController;
+  late TextEditingController _heightController;
+  late TextEditingController _imageURLController;
+  var userController = UserController();
+  bool isWeightChanged = false;
+  var weightController = WeightController();
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.profile["name"]);
-    _weightController =
-        TextEditingController(text: widget.profile["weight"].toString());
-    _ageController =
-        TextEditingController(text: widget.profile["age"].toString());
+    _weightController = TextEditingController(text: widget.profile["weight"]);
+    _ageController = TextEditingController(text: widget.profile["age"]);
     _desiredWeightController =
-        TextEditingController(text: widget.profile["desiredWeight"].toString());
+        TextEditingController(text: widget.profile["desiredWeight"]);
     _fitnessStyleController =
         TextEditingController(text: widget.profile["fitnessStyle"]);
+    _heightController = TextEditingController(text: widget.profile["height"]);
+    _imageURLController =
+        TextEditingController(text: widget.profile["imageURL"]);
   }
 
   @override
@@ -235,6 +291,63 @@ class _EditProfileState extends State<EditProfile> {
     _ageController.dispose();
     _desiredWeightController.dispose();
     super.dispose();
+  }
+
+  String url = "";
+  String holderURL = "";
+
+  Future<void> _displayTextInputDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Update Image'),
+            content: TextField(
+              onChanged: (value) {
+                setState(() {
+                  holderURL = value;
+                });
+              },
+              controller: _imageURLController,
+              decoration: const InputDecoration(hintText: "URL"),
+            ),
+            actions: <Widget>[
+              OutlinedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+              OutlinedButton(
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                  ),
+                  backgroundColor: MaterialStateProperty.all(trifitColor[900]),
+                ),
+                onPressed: () {
+                  setState(() {
+                    widget.profile["imageURL"] = holderURL;
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -253,14 +366,20 @@ class _EditProfileState extends State<EditProfile> {
           children: [
             CircleAvatar(
               radius: 75,
-              backgroundImage: NetworkImage(widget.profile["imageUrl"]),
+              backgroundImage: NetworkImage(widget.profile["imageURL"]),
               child: Stack(
-                children: const [
+                children: [
                   Align(
                     alignment: Alignment.bottomRight,
                     child: CircleAvatar(
                       radius: 20,
-                      child: Icon(Icons.edit),
+                      child: IconButton(
+                        icon: const Icon(Icons.edit),
+                        tooltip: 'Update Profile Picture',
+                        onPressed: () {
+                          _displayTextInputDialog(context);
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -288,11 +407,48 @@ class _EditProfileState extends State<EditProfile> {
               ),
               onChanged: (String value) {
                 setState(() {
+                  isWeightChanged = true;
                   widget.profile["weight"] = value;
                 });
               },
             ),
+            TextField(
+              controller: _heightController,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Height (feet)',
+              ),
+              onChanged: (String value) {
+                setState(() {
+                  widget.profile["height"] = value;
+                });
+              },
+            ),
             const SizedBox(height: 10),
+            DropdownButton<String>(
+              value: widget.profile["gender"],
+              icon: const Icon(Icons.arrow_drop_down),
+              isExpanded: true,
+              elevation: 16,
+              // style: const TextStyle(color: Colors.deepPurple),
+              underline: Container(
+                height: 2,
+                color: Colors.grey,
+                padding: const EdgeInsets.only(top: 100),
+              ),
+              onChanged: (String? newValue) {
+                setState(() {
+                  widget.profile["gender"] = newValue!;
+                });
+              },
+              items: <String>['male', 'female', 'unspecified']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
             TextField(
               controller: _ageController,
               decoration: const InputDecoration(
@@ -301,7 +457,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               onChanged: (String value) {
                 setState(() {
-                  widget.profile["Age"] = value;
+                  widget.profile["age"] = value;
                 });
               },
             ),
@@ -331,7 +487,7 @@ class _EditProfileState extends State<EditProfile> {
                 });
               },
             ),
-            const SizedBox(height: 100),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -361,7 +517,25 @@ class _EditProfileState extends State<EditProfile> {
                         ),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      await userController.updateUser(
+                        ProfileModel(
+                          widget.profile["name"],
+                          widget.profile["weight"],
+                          widget.profile["age"],
+                          widget.profile["desiredWeight"],
+                          widget.profile["fitnessStyle"],
+                          widget.profile['height'],
+                          widget.profile['gender'],
+                          widget.profile['imageURL'],
+                        ),
+                      );
+                      if (isWeightChanged) {
+                        await weightController.addWeight(WeightModel(
+                          widget.profile["weight"],
+                          DateTime.now(),
+                        ));
+                      }
                       Navigator.of(context).pop(widget.profile);
                     },
                     child: const Text('Save'),

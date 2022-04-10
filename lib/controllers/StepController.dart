@@ -73,6 +73,14 @@ class StepController {
     return allSteps.where((i) => i["date"] == Timestamp.fromDate(day)).toList();
   }
 
+  getAllCaloriesBurned() {
+    double totalCaloriesBurned = 0;
+    for (var i = 0; i < allSteps.length; i++) {
+      totalCaloriesBurned += allSteps[i]['calories'];
+    }
+    return totalCaloriesBurned;
+  }
+
   addSteps(StepModel toAdd) async {
     var exercise =
         ExerciseModel("steps", toAdd, toAdd.calories.toDouble(), toAdd.date);
