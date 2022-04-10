@@ -4,10 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:trifit/data/profile.dart';
+import '../models/WeightModel.dart';
 import '../models/ProfileModel.dart';
 import '../utilities/Styles.dart';
 import '../components/friendList.dart';
 import '../controllers/UserController.dart';
+import '../controllers/StepController.dart';
+import '../controllers/WeightController.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -18,6 +21,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   var userController = UserController();
+  var stepController = StepController();
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -191,7 +195,11 @@ class _ProfileState extends State<Profile> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(profileData['fitnessStyle']),
-                                    Text(""),
+                                    Text(
+                                      stepController
+                                          .getAllCaloriesBurned()
+                                          .toString(),
+                                    ),
                                     Text(profileData['desiredWeight']),
                                     Text(""),
                                   ],
@@ -251,6 +259,8 @@ class _EditProfileState extends State<EditProfile> {
   late TextEditingController _heightController;
   late TextEditingController _imageURLController;
   var userController = UserController();
+  bool isWeightChanged = false;
+  var weightController = WeightController();
 
   @override
   void initState() {
@@ -335,7 +345,6 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
-    String gender = widget.profile["gender"];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
@@ -391,6 +400,7 @@ class _EditProfileState extends State<EditProfile> {
               ),
               onChanged: (String value) {
                 setState(() {
+                  isWeightChanged = true;
                   widget.profile["weight"] = value;
                 });
               },
@@ -513,6 +523,12 @@ class _EditProfileState extends State<EditProfile> {
                           widget.profile['imageURL'],
                         ),
                       );
+                      if (isWeightChanged) {
+                        await weightController.addWeight(WeightModel(
+                          widget.profile["weight"],
+                          DateTime.now(),
+                        ));
+                      }
                       Navigator.of(context).pop(widget.profile);
                     },
                     child: const Text('Save'),
