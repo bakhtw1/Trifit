@@ -6,6 +6,13 @@ class FeedModel {
 
   FeedModel(this.desc, this.img);
 
+  @override
+  // String toString(){
+
+  //   String feedString = "Meal type: "+mealType + "\nItems: \n";
+  //   mealString += "Date: "+date.toString();
+  // }
+
   Map<String, dynamic> toJson() {
     return {'desc': desc, 'img': img};
   }

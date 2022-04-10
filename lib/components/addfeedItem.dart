@@ -73,17 +73,6 @@ class _AddFeedItemState extends State<AddFeedItem> {
                     SizedBox(
                       height: 10,
                     ),
-                    // TextField(
-                    //   style: TextStyle(decoration: TextDecoration.none),
-                    //   decoration: InputDecoration(
-                    //     hintText: 'What would you like to share?',
-                    //     border: InputBorder.none,
-                    //     focusedBorder: InputBorder.none,
-                    //     enabledBorder: InputBorder.none,
-                    //   ),
-                    //   controller: myController,
-                    // ),
-
                     TextFormField(
                       controller: myController,
                       decoration: const InputDecoration(
@@ -97,7 +86,6 @@ class _AddFeedItemState extends State<AddFeedItem> {
                         return null;
                       },
                     ),
-
                     TextField(
                       controller: imgController,
                       decoration: const InputDecoration(

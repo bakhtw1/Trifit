@@ -31,4 +31,12 @@ class FeedController {
       "feeds": FieldValue.arrayUnion([toAdd.toJson()])
     });
   }
+
+  getFeed() {
+    var feelist = [];
+    for (int i = 0; i < allFeeds.length; i++) {
+      feelist = allFeeds[i].desc;
+    }
+    return feelist;
+  }
 }
