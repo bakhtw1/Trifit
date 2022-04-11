@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:trifit/data/profile.dart';
 import '../models/WeightModel.dart';
 import '../models/ProfileModel.dart';
 import '../utilities/Styles.dart';
