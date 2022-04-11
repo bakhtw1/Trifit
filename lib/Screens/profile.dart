@@ -429,7 +429,6 @@ class _EditProfileState extends State<EditProfile> {
               icon: const Icon(Icons.arrow_drop_down),
               isExpanded: true,
               elevation: 16,
-              // style: const TextStyle(color: Colors.deepPurple),
               underline: Container(
                 height: 2,
                 color: Colors.grey,

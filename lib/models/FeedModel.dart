@@ -10,12 +10,6 @@ class FeedModel {
   FeedModel(this.name, this.desc, this.img, this.profileImageURL, this.date);
 
   @override
-  // String toString(){
-
-  //   String feedString = "Meal type: "+mealType + "\nItems: \n";
-  //   mealString += "Date: "+date.toString();
-  // }
-
   Map<String, dynamic> toJson() {
     return {
       'desc': desc,

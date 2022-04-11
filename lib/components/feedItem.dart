@@ -89,7 +89,4 @@ class _FeedItemState extends State<FeedItem> {
       ),
     );
   }
-
-//ImagePicker instance.
-
 }

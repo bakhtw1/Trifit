@@ -47,42 +47,6 @@ class _FeedState extends State<Feed> {
             return CircularProgressIndicator();
           }
           return Scaffold(
-            // body: ListView.builder(
-            //     itemCount: posts.length,
-            //     itemBuilder: (BuildContext context, int index) {
-            //       Map post = posts[index];
-            //       return FeedItem(
-            //         dp: post['dp'],
-            //         name: feedConroller.allFeeds.desc,
-            //         desc: post['desc'],
-            //         img: post['img'],
-            //       );
-            //     }),
-
-            // body: StreamBuilder<QuerySnapshot>(
-            //   stream: users,
-            //   builder: (
-            //     BuildContext context,
-            //     AsyncSnapshot<QuerySnapshot> snapshot,
-            //   ) {
-            //     if (snapshot.hasError) {
-            //       return Text('something went wrong');
-            //     }
-            //     if (snapshot.connectionState == ConnectionState.waiting) {
-            //       return Text('Loading');
-            //     }
-
-            //     //final data = snapshot.requireData;
-            //     return ListView.builder(
-            //         itemCount: feedData.length,
-            //         itemBuilder: (context, index) {
-            //           feedConroller.getAllFeeds();
-            //           //print(feedData[index]);
-            //           return Text("Test"); //data.docs[index].data()['desc']);
-            //         });
-            //   },
-            // ),
-
             body: FutureBuilder(
                 future: feedConroller.getAllFeeds(),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {

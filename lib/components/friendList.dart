@@ -59,7 +59,6 @@ class _FriendListState extends State<FriendList> {
       itemCount: friends.length,
       itemBuilder: (context, index) => Container(
         alignment: Alignment.center,
-        // padding: const EdgeInsets.only(left: 8, right: 8, bottom: 50),
         margin: const EdgeInsets.all(8),
         child: ListTile(
           leading: CircleAvatar(

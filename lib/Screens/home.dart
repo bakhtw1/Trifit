@@ -128,7 +128,6 @@ class _HomePageState extends State<HomePage> {
                           load();
                         })
                       }),
-                  // icon: const Icon(CustomIcons.scale, size: 24),
                   icon: const Icon(ScaleIcon.scale, size: 24),
                 ),
                 ActionButton(
